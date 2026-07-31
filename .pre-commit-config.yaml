@@ -1,0 +1,160 @@
+minimum_pre_commit_version: 4.2.0
+
+ci:
+  autoupdate_commit_msg: "chore(pre-commit): autoupdate"
+  skip:
+    - pytest
+
+repos:
+  # Multi
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # General
+      - id: check-added-large-files
+        args: [--enforce-all]
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-illegal-windows-names
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-vcs-permalinks
+      - id: check-xml
+      - id: check-yaml
+      - id: destroyed-symlinks
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: forbid-submodules
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: pretty-format-json
+        args: [--autofix, --indent=4, --no-sort-keys]
+      - id: trailing-whitespace
+      # Python
+      # - id: check-ast  # ruff-format and ruff-check already do this
+      # - id: check-builtin-literals  # mostly done by ruff-check (UP018 and C408)
+      # - id: double-quote-string-fixer  # quotes are done by ruff-format and ruff-check
+      - id: debug-statements
+      - id: name-tests-test
+        args: [--pytest-test-first]
+
+  - repo: https://github.com/GideonBear/pre-commit-hooks
+    rev: v3.0.0
+    hooks:
+      # General
+      - id: pre-commit-ci-skip
+      # Gha
+      - id: gha-pin
+      # Python
+      - id: pre-commit-additional-dependencies
+      # General - post
+      - id: pre-commit-config-fmt
+
+  # General
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.3
+    hooks:
+      - id: codespell
+        args: [--write-changes]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
+
+  # For .github/renovate.json5
+  - repo: https://github.com/whtsky/pre-commit-pretty-format-json5
+    rev: 1.0.0
+    hooks:
+      - id: pretty-format-json5
+        args: [--indent=4, --no-sort-keys]
+
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 1.0.0
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-gfm-alerts
+          - mdformat-toc
+
+  # Gha
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.28.0
+    hooks:
+      - id: zizmor
+        args: [--no-progress, --persona=auditor]
+      - id: zizmor
+        alias: zizmor-fix
+        stages: [manual]
+        args: [--no-progress, --persona=auditor, --fix=all]
+
+  # Python
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.1
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-check
+        alias: ruff-check-pyproject
+        name: ruff check (pyproject.toml)
+        types_or: [toml]
+        files: pyproject.toml$
+        args: [--fix]
+      - id: ruff-check
+        alias: ruff-fix
+        stages: [manual]
+        args: [--fix, --unsafe-fixes]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v2.3.0
+    hooks:
+      - id: mypy
+        pass_filenames: false # Check all files to be thorough
+        args: [.] # Removes default `--ignore-missing-imports`
+
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: v2.26.0
+    hooks:
+      - id: pyproject-fmt
+
+  - repo: https://github.com/francescorubbo/deptry-pre-commit
+    rev: v0.25.1
+    hooks:
+      - id: deptry
+        args: [src]
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.12.0
+    hooks:
+      - id: uv-lock
+
+  - repo: https://github.com/sco1/pre-commit-python-eol
+    rev: v2026.7.0
+    hooks:
+      - id: check-eol-cached
+
+  # Pytest
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: python -m pytest
+        language: system
+        pass_filenames: false
+        always_run: true

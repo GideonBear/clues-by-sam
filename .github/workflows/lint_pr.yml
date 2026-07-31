@@ -1,0 +1,26 @@
+name: Lint PR
+
+# zizmor: ignore[concurrency-limits] this workflow only runs for a few seconds. If we cancel-in-progress, the check on the commit
+#  might get canceled in favor of the check on the PR edit, causing `allprs` to fail. `cancel-in-progress: false` doesn't help,
+#  and we just want it done as fast as possible.
+
+on:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] this is the only way, and we're not running user code
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+
+permissions: {}
+
+jobs:
+  main:
+    name: Validate PR title # zizmor: ignore[concurrency-limits] see above
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read # amannn/action-semantic-pull-request
+    steps:
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

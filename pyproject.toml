@@ -1,0 +1,104 @@
+[build-system]
+build-backend = "uv_build"
+requires = [ "uv-build>=0.12,<0.13" ]
+
+[project]
+name = "clues-by-sam"
+version = "0.1.0"
+description = "Solver for Clues By Sam using Z3"
+readme = "README.md"
+license = "GPL-3.0-only"
+authors = [
+    { name = "GideonBear", email = "dig-sultry-sedate@duck.com" },
+]
+requires-python = ">=3.14"
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Typing :: Typed",
+]
+dependencies = []
+urls.bugs = "https://github.com/GideonBear/clues-by-sam/issues"
+urls.homepage = "https://github.com/GideonBear/clues-by-sam"
+scripts.clues-by-sam = "clues_by_sam.main:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.1",
+]
+
+[tool.ruff]
+format.preview = true
+format.nested-string-quote-style = "preferred"
+lint.select = [
+    "ALL",
+    "call-datetime-today", # Useful outside of timezones
+]
+lint.ignore = [
+    "CPY",                               # No copyright statements
+    "D1",                                # Docstrings should not be enforced by default
+    "incorrect-blank-line-before-class", # Choose D203 or D211
+    "missing-trailing-comma",            # Conflict with formatter
+    "multi-line-summary-first-line",     # Choose D212 or D213
+    "suspicious-subprocess-import",      # Uses of subprocess are rejected, no need to reject the imports as well
+]
+lint.per-file-ignores."tests/**/*.py" = [
+    "assert",                     # Assert is allowed in tests
+    "FBT",                        # We don't care about boolean parameters in tests
+    "implicit-namespace-package", # Tests are supposed to be an implicit namespace
+    "line-too-long",              # If the formatter doesn't fix the line length, it's good enough
+    "magic-value-comparison",     # Magic values are allowed in tests
+]
+lint.flake8-tidy-imports.ban-relative-imports = "all"  # For consistency
+lint.isort.combine-as-imports = true
+lint.isort.lines-after-imports = 2
+lint.isort.required-imports = [ "from __future__ import annotations" ]
+lint.preview = true
+
+[tool.pyproject-fmt]
+indent = 4
+
+[tool.mypy]
+exclude = "^tests/"
+# It already warns for the import, so we do not want to warn for each individual use.
+# If the import is silenced, there's nothing else we can do so silence the uses as well.
+# disallow_any_unimported = true
+disallow_any_decorated = true
+disallow_any_explicit = true
+disallow_any_generics = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_return_any = true
+warn_unreachable = true
+enable_error_code = [
+    "deprecated",
+    "exhaustive-match",
+    "ignore-without-code",
+    "mutable-override",
+    "possibly-undefined",
+    "possibly-undefined",
+    "redundant-expr",
+    "redundant-self",
+    "truthy-bool",
+    "truthy-iterable",
+    "unused-awaitable",
+]
+extra_checks = true
+implicit_reexport = false
+strict_concatenate = true
+strict_equality = true
+strict_bytes = true
+strict = true  # All strict checks are already listed here, only here for future-proofing
+show_error_context = true
+pretty = true
+warn_unused_configs = true
+show_error_codes = true
