@@ -18,6 +18,7 @@ from clues_by_sam.clues import (
     Equal,
     Exact,
     Known,
+    Left,
     More,
     Neighboring,
     Not,
@@ -161,6 +162,10 @@ from clues_by_sam.game import Person
                 Overlap(Neighboring(Person("Gary")), Neighboring(Person("Mark"))),
                 Exact(INNOCENT, 3),
             ),
+        ),
+        (
+            "There is only one innocent to the left of Carol",
+            RegionClue(Left(Person("Carol")), Exact(INNOCENT, 1)),
         ),
     ],
 )

@@ -378,7 +378,7 @@ class Clue(ABC):
             case [
                 "There",
                 "is" | "are",
-                "exactly",
+                "exactly" | "only",
                 amount,
                 "innocent" | "innocents" | "criminal" | "criminals" as verdict,
                 *region,
@@ -389,7 +389,7 @@ class Clue(ABC):
                 )
 
             case [
-                "Exactly",
+                "Exactly" | "Only",
                 amount,
                 "innocent" | "innocents" | "criminal" | "criminals" as verdict,
                 *region,
@@ -432,7 +432,7 @@ class Clue(ABC):
                 )
 
             case [
-                "Only" | "Exactly",
+                "Exactly" | "Only",
                 spec_amount,
                 "of",
                 "the",
@@ -462,11 +462,11 @@ class Clue(ABC):
                 )
 
             case [
-                "Only",
+                "Exactly" | "Only",
                 "one",
                 "row" | "column" as typ,
                 "has",
-                "exactly",
+                "exactly" | "only",
                 amount,
                 "innocent" | "innocents" | "criminal" | "criminals" as verdict,
             ]:
@@ -490,7 +490,7 @@ class Clue(ABC):
                 "only",
                 typ_2,
                 "with",
-                "exactly",
+                "exactly" | "only",
                 amount,
                 "innocents" | "criminals" as verdict,
             ] if typ_1.lower() == typ_2:
@@ -534,7 +534,7 @@ class Clue(ABC):
             case [
                 person,
                 "has",
-                "exactly",
+                "exactly" | "only",
                 amount,
                 "innocent" | "criminal" as verdict,
                 "neighbors",
@@ -545,12 +545,12 @@ class Clue(ABC):
                 )
 
             case [
-                "Only",
+                "Exactly" | "Only",
                 "one",
                 "person",
                 *region,
                 "has",
-                "exactly",
+                "exactly" | "only",
                 amount,
                 "innocent" | "criminal" as verdict,
                 "neighbors",
