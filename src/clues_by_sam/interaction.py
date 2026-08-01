@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from time import sleep
-
 from playwright.sync_api import Locator, Page, sync_playwright
 
 from clues_by_sam.clues import CRIMINAL, INNOCENT, Clue, Known
@@ -70,9 +68,6 @@ def play_game(
             page.locator(".btn-innocent").click()
         else:
             page.locator(".btn-criminal").click()
-
-        # Make sure the card is updated
-        sleep(0.1)
 
         card_person, card_knowns, card_clues = process_card(card)
         if card_person != move.person:
