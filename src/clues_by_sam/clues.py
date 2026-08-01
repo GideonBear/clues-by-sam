@@ -622,6 +622,20 @@ class Clue(ABC):
                 )
 
             case [
+                "There",
+                "are",
+                "more",
+                "innocents" | "criminals" as verdict,
+                *region_than_region,
+            ] if "than" in region_than_region:
+                region_a, region_b = splitlist(region_than_region, "than")
+                return More(
+                    Region.parse_region(region_a),
+                    Region.parse_region(region_b),
+                    Verdict.parse(verdict),
+                )
+
+            case [
                 a,
                 "has",
                 "more",

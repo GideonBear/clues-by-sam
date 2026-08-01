@@ -184,6 +184,10 @@ from clues_by_sam.game import Person
                 ),
             ),
         ),
+        (
+            "There are more innocents in column A than column B",
+            More(Column(0), Column(1), INNOCENT),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
