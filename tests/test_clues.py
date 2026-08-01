@@ -14,6 +14,7 @@ from clues_by_sam.clues import (
     Connected,
     ConnectedRegionClue,
     Edges,
+    Equal,
     Exact,
     Neighboring,
     Not,
@@ -117,6 +118,10 @@ from clues_by_sam.game import Person
                     Overlap(Neighboring(Person("Will")), Row(3)), Exact(INNOCENT, 2)
                 ),
             ),
+        ),
+        (
+            "Kumar and Will have an equal number of innocent neighbors",
+            Equal(Neighboring(Person("Kumar")), Neighboring(Person("Will")), INNOCENT),
         ),
     ],
 )

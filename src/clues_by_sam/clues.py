@@ -8,7 +8,7 @@ from string import ascii_uppercase
 from typing import TYPE_CHECKING, Self, override
 
 import z3  # type: ignore[import-untyped]
-from z3 import And, BoolRef, If, PbEq, Sum
+from z3 import And, BoolRef, If, IntNumRef, PbEq, Sum
 
 from clues_by_sam.game import COLUMNS, ROWS, Field, Person
 from clues_by_sam.utils import splitlist
@@ -244,6 +244,16 @@ class Constraint(ConnectedConstraint, ABC):
     ) -> BoolRef: ...
 
 
+def count(
+    people: Iterable[Person], people_m: Mapping[Person, BoolRef], verdict: Verdict
+) -> IntNumRef:
+    people = tuple(people)
+    c = Sum([If(people_m[person], 1, 0) for person in people])
+    if verdict == INNOCENT:
+        c = len(people) - c
+    return c
+
+
 @dataclass(frozen=True)
 class Exact(Constraint):
     typ: Verdict
@@ -252,11 +262,7 @@ class Exact(Constraint):
     def z3(
         self, people: Iterable[Person], people_m: Mapping[Person, BoolRef]
     ) -> BoolRef:
-        people = tuple(people)
-        count = Sum([If(people_m[person], 1, 0) for person in people])
-        if self.typ == INNOCENT:
-            count = len(people) - count
-        return count == self.amount
+        return count(people, people_m, self.typ) == self.amount
 
 
 @dataclass(frozen=True)
@@ -278,11 +284,7 @@ class Parity(Constraint):
     def z3(
         self, people: Iterable[Person], people_m: Mapping[Person, BoolRef]
     ) -> BoolRef:
-        people = tuple(people)
-        count = Sum([If(people_m[person], 1, 0) for person in people])
-        if self.typ == INNOCENT:
-            count = len(people) - count
-        return count % 2 == self.parity
+        return count(people, people_m, self.typ) % 2 == self.parity
 
 
 @dataclass(frozen=True)
@@ -506,6 +508,24 @@ class Clue(ABC):
                     Exact(Verdict.parse(verdict), int(amount)),
                 )
 
+            case [
+                a,
+                "and",
+                b,
+                "have",
+                "an",
+                "equal",
+                "number",
+                "of",
+                "innocent" | "criminal" as verdict,
+                "neighbors",
+            ]:
+                return Equal(
+                    Neighboring(Person(a)),
+                    Neighboring(Person(b)),
+                    Verdict.parse(verdict),
+                )
+
             case _:
                 msg = f"Unknown clue: '{clue_s}'"
                 raise ValueError(msg)
@@ -577,3 +597,15 @@ class OnlyOne(Clue):
 
     def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
         return PbEq([(clue.z3(field, people), 1) for clue in self.clues], 1)
+
+
+@dataclass(frozen=True)
+class Equal(Clue):
+    a: Region
+    b: Region
+    verdict: Verdict
+
+    def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
+        return count(self.a.people(field), people, self.verdict) == count(
+            self.b.people(field), people, self.verdict
+        )
