@@ -6,6 +6,7 @@ from clues_by_sam.clues import (
     CRIMINAL,
     INNOCENT,
     Above,
+    AtLeast,
     Below,
     Between,
     Clue,
@@ -127,6 +128,16 @@ from clues_by_sam.game import Person
         (
             "Chris has more innocent neighbors than Xavi",
             More(Neighboring(Person("Chris")), Neighboring(Person("Xavi")), INNOCENT),
+        ),
+        (
+            "Each row has at least 3 innocents",
+            Combined(
+                RegionClue(Row(0), AtLeast(INNOCENT, 3)),
+                RegionClue(Row(1), AtLeast(INNOCENT, 3)),
+                RegionClue(Row(2), AtLeast(INNOCENT, 3)),
+                RegionClue(Row(3), AtLeast(INNOCENT, 3)),
+                RegionClue(Row(4), AtLeast(INNOCENT, 3)),
+            ),
         ),
     ],
 )

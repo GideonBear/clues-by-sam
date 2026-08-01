@@ -266,6 +266,17 @@ class Exact(Constraint):
 
 
 @dataclass(frozen=True)
+class AtLeast(Constraint):
+    typ: Verdict
+    amount: int
+
+    def z3(
+        self, people: Iterable[Person], people_m: Mapping[Person, BoolRef]
+    ) -> BoolRef:
+        return count(people, people_m, self.typ) >= self.amount
+
+
+@dataclass(frozen=True)
 class Parity(Constraint):
     typ: Verdict
     parity: int
@@ -539,6 +550,28 @@ class Clue(ABC):
                     Neighboring(Person(a)),
                     Neighboring(Person(b)),
                     Verdict.parse(verdict),
+                )
+
+            case [
+                "Each",
+                "row" | "column" as typ,
+                "has",
+                "at",
+                "least",
+                amount,
+                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
+            ]:
+                region_type = Row if typ == "row" else Column
+                num = ROWS if typ == "row" else COLUMNS
+                verdict_p = Verdict.parse(verdict)
+                return Combined(
+                    *(
+                        RegionClue(
+                            region_type(i),
+                            AtLeast(verdict_p, int(amount)),
+                        )
+                        for i in range(num)
+                    )
                 )
 
             case _:

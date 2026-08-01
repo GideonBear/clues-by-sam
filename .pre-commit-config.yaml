@@ -61,7 +61,7 @@ repos:
     rev: v2.4.3
     hooks:
       - id: codespell
-        args: [--write-changes]
+        args: [--write-changes, -L, AtLeast]
 
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
