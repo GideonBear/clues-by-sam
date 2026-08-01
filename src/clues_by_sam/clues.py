@@ -499,7 +499,7 @@ class Clue(ABC):
                 "with",
                 "exactly" | "only",
                 amount,
-                "innocents" | "criminals" as verdict,
+                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
             ] if typ_1.lower() == typ_2:
                 region_type = Row if typ_2 == "row" else Column
                 num = ROWS if typ_2 == "row" else COLUMNS
