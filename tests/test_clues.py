@@ -155,6 +155,13 @@ from clues_by_sam.game import Person
                 RegionClue(Neighboring(Person("Mark")), Exact(CRIMINAL, 4)),
             ),
         ),
+        (
+            "Gary and Mark have 3 innocent neighbors in common",
+            RegionClue(
+                Overlap(Neighboring(Person("Gary")), Neighboring(Person("Mark"))),
+                Exact(INNOCENT, 3),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:

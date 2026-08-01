@@ -613,6 +613,22 @@ class Clue(ABC):
                 )
 
             case [
+                a,
+                "and",
+                b,
+                "have",
+                amount,
+                "innocent" | "criminal" as verdict,
+                "neighbors",
+                "in",
+                "common",
+            ]:
+                return RegionClue(
+                    Overlap(Neighboring(Person(a)), Neighboring(Person(b))),
+                    Exact(Verdict.parse(verdict), parse_num(amount)),
+                )
+
+            case [
                 "Each",
                 "row" | "column" as typ,
                 "has",
