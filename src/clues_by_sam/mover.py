@@ -39,6 +39,7 @@ class Mover:
                 if self.solver.check() == unsat:
                     self.solver.pop()
                     self.solver.add(self.people[unknown] == (not verdict))
+                    self.unknowns.remove(unknown)
                     return Known(unknown, Verdict(not verdict))
                 self.solver.pop()
 
