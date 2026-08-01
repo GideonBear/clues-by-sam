@@ -345,6 +345,12 @@ class Not(Constraint):
         return z3.Not(self.constraint.z3(people, people_m))
 
 
+def parse_num(s: str) -> int:
+    if s == "one":
+        return 1
+    return int(s)
+
+
 class Clue(ABC):
     @abstractmethod
     def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef: ...
@@ -379,7 +385,7 @@ class Clue(ABC):
             ]:
                 return RegionClue(
                     Region.parse_region(region),
-                    Exact(Verdict.parse(verdict), int(amount)),
+                    Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
             case [
@@ -390,7 +396,7 @@ class Clue(ABC):
             ]:
                 return RegionClue(
                     Region.parse_region(region),
-                    Exact(Verdict.parse(verdict), int(amount)),
+                    Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
             case [
@@ -448,10 +454,10 @@ class Clue(ABC):
                 spec_region = Region.parse_region(spec_region_s)
                 verdict_p = Verdict.parse(verdict)
                 return Combined(
-                    RegionClue(total_region, Exact(verdict_p, int(total_amount))),
+                    RegionClue(total_region, Exact(verdict_p, parse_num(total_amount))),
                     RegionClue(
                         Overlap(total_region, spec_region),
-                        Exact(verdict_p, int(spec_amount)),
+                        Exact(verdict_p, parse_num(spec_amount)),
                     ),
                 )
 
@@ -462,14 +468,15 @@ class Clue(ABC):
                 "has",
                 "exactly",
                 amount,
-                "innocents" | "criminals" as verdict,
+                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
             ]:
                 region_type = Row if typ == "row" else Column
                 num = ROWS if typ == "row" else COLUMNS
                 return OnlyOne(
                     *(
                         RegionClue(
-                            region_type(i), Exact(Verdict.parse(verdict), int(amount))
+                            region_type(i),
+                            Exact(Verdict.parse(verdict), parse_num(amount)),
                         )
                         for i in range(num)
                     )
@@ -495,11 +502,11 @@ class Clue(ABC):
                     *(
                         RegionClue(
                             region_type(i),
-                            Exact(verdict_p, int(amount)),
+                            Exact(verdict_p, parse_num(amount)),
                         )
                         if region_type(i) == row_or_column_p
                         else RegionClue(
-                            region_type(i), Not(Exact(verdict_p, int(amount)))
+                            region_type(i), Not(Exact(verdict_p, parse_num(amount)))
                         )
                         for i in range(num)
                     )
@@ -515,7 +522,7 @@ class Clue(ABC):
             ]:
                 return RegionClue(
                     Neighboring(Person(person)),
-                    Exact(Verdict.parse(verdict), int(amount)),
+                    Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
             case [
@@ -532,7 +539,7 @@ class Clue(ABC):
                 return OnlyOnePerson(
                     Region.parse_region(region),
                     Neighboring,
-                    Exact(Verdict.parse(verdict), int(amount)),
+                    Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
             case [
@@ -602,7 +609,7 @@ class Clue(ABC):
                     *(
                         RegionClue(
                             region_type(i),
-                            AtLeast(verdict_p, int(amount)),
+                            AtLeast(verdict_p, parse_num(amount)),
                         )
                         for i in range(num)
                     )
