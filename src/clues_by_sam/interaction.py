@@ -62,7 +62,6 @@ def play_game(
     knowns: list[Known],
     clues: list[Clue],
 ) -> None:
-    # TODO: implement
     mover = Mover(field, knowns)
     mover.add_clues(clues)
     while True:
