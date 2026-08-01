@@ -311,7 +311,7 @@ class Connected(ConnectedConstraint):
                 for k in range(j + 1, len(people)):
                     if self.typ == CRIMINAL:
                         constraints.append(
-                            Not(
+                            z3.Not(
                                 And(
                                     people_m[people[i]],
                                     z3.Not(people_m[people[j]]),
@@ -321,7 +321,7 @@ class Connected(ConnectedConstraint):
                         )
                     else:
                         constraints.append(
-                            Not(
+                            z3.Not(
                                 And(
                                     z3.Not(people_m[people[i]]),
                                     people_m[people[j]],
