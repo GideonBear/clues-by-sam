@@ -8,7 +8,7 @@ from functools import reduce
 from string import ascii_uppercase
 from typing import TYPE_CHECKING, Self, override
 
-from clues_by_sam.utils import splitlist
+from clues_by_sam.utils import splitlist, splitlist_by_subseq
 
 
 if TYPE_CHECKING:
@@ -95,9 +95,9 @@ class Region(ABC):
             match region[:i]:
                 case ["on", "the", "edges"]:
                     found = Edges()
-                case ["in", "column", column]:
+                case ["in", "column", column] | ["column", column]:
                     found = Column.parse(column)
-                case ["in", "row", row]:
+                case ["in", "row", row] | ["row", row]:
                     found = Row.parse(row)
                 case ["above", person]:
                     found = Above(Person(person))
@@ -301,7 +301,7 @@ class Not(Constraint):
 
 class Clue(ABC):  # ruff: ignore[abstract-base-class-without-abstract-method] TODO
     @classmethod
-    def parse(cls, clue_s: str) -> Clue:  # ruff: ignore[complex-structure, too-many-locals, too-many-return-statements]
+    def parse(cls, clue_s: str) -> Clue:  # ruff: ignore[complex-structure, too-many-branches, too-many-locals, too-many-return-statements]
         clue = clue_s.split()
         # Note that it does not matter what regions apply to:
         #  "An odd number of innocents above Vera neighbor Martin" means the same as
@@ -376,7 +376,7 @@ class Clue(ABC):  # ruff: ignore[abstract-base-class-without-abstract-method] TO
                 )
 
             case [
-                "Only",
+                "Only" | "Exactly",
                 spec_amount,
                 "of",
                 "the",
@@ -384,10 +384,18 @@ class Clue(ABC):  # ruff: ignore[abstract-base-class-without-abstract-method] TO
                 "innocents" | "criminals" as verdict,
                 *region_is_region,
             ]:
-                if "is" not in region_is_region:
-                    msg = f"Expected to find 'is' in this combined clue: '{clue_s}'"
+                if "is" in region_is_region:
+                    total_region_s, spec_region_s = splitlist(region_is_region, "is")
+                elif "are" in region_is_region and "in" in region_is_region:
+                    total_region_s, spec_region_s = splitlist_by_subseq(
+                        region_is_region, ("are", "in")
+                    )
+                else:
+                    msg = (
+                        f"Expected to find 'is' or 'are in' in this combined clue: "
+                        f"'{clue_s}'"
+                    )
                     raise ValueError(msg)
-                total_region_s, spec_region_s = splitlist(region_is_region, "is")
                 total_region = Region.parse_region(total_region_s)
                 spec_region = Region.parse_region(spec_region_s)
                 verdict_p = Verdict.parse(verdict)

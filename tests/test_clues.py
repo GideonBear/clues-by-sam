@@ -107,6 +107,15 @@ from clues_by_sam.clues import (
                 Exact(INNOCENT, 1),
             ),
         ),
+        (
+            "Exactly 2 of the 4 innocents neighboring Will are in row 4",
+            Combined(
+                RegionClue(Neighboring(Person("Will")), Exact(INNOCENT, 4)),
+                RegionClue(
+                    Overlap(Neighboring(Person("Will")), Row(3)), Exact(INNOCENT, 2)
+                ),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
