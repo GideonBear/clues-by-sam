@@ -503,6 +503,19 @@ class Clue(ABC):
                 )
 
             case [
+                person,
+                "has",
+                "exactly",
+                amount,
+                "innocent" | "criminal" as verdict,
+                "neighbors",
+            ]:
+                return RegionClue(
+                    Neighboring(Person(person)),
+                    Exact(Verdict.parse(verdict), int(amount)),
+                )
+
+            case [
                 "Only",
                 "one",
                 "person",
