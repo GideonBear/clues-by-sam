@@ -658,8 +658,11 @@ class OnlyOnePerson(Clue):
     def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
         return PbEq(
             [
-                RegionClue(self.personal_region(person), self.constraint).z3(
-                    field, people
+                (
+                    RegionClue(self.personal_region(person), self.constraint).z3(
+                        field, people
+                    ),
+                    1,
                 )
                 for person in self.region.people(field)
             ],
