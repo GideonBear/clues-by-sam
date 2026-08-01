@@ -27,6 +27,7 @@ from clues_by_sam.clues import (
     Overlap,
     Parity,
     RegionClue,
+    Right,
     Row,
 )
 from clues_by_sam.game import Person
@@ -188,7 +189,14 @@ from clues_by_sam.game import Person
             "There are more innocents in column A than column B",
             More(Column(0), Column(1), INNOCENT),
         ),
+        (
+            "I'm the only innocent to the right of Quita",
+            Combined(
+                Known(Person("Me"), INNOCENT),
+                RegionClue(Right(Person("Quita")), Exact(INNOCENT, 1)),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
-    assert Clue.parse(clue) == expected
+    assert Clue.parse(clue, Person("Me")) == expected

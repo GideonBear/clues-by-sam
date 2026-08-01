@@ -109,6 +109,6 @@ def process_card(card: Locator) -> tuple[Person, list[Known], list[Clue]]:
     if "has-hint" in classes:
         hint = card.locator(".hint").text_content()
         assert hint is not None
-        clues.append(Clue.parse(hint))
+        clues.append(Clue.parse(hint, person))
 
     return person, knowns, clues

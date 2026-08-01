@@ -356,7 +356,7 @@ class Clue(ABC):
     def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef: ...
 
     @classmethod
-    def parse(cls, clue_s: str) -> Clue:  # ruff: ignore[complex-structure, too-many-branches, too-many-locals, too-many-return-statements]
+    def parse(cls, clue_s: str, me: Person) -> Clue:  # ruff: ignore[complex-structure, too-many-branches, too-many-locals, too-many-return-statements, too-many-statements]
         clue = clue_s.split()
         # Note that it does not matter what regions apply to:
         #  "An odd number of innocents above Vera neighbor Martin" means the same as
@@ -566,6 +566,33 @@ class Clue(ABC):
                 return RegionClue(
                     Neighboring(Person(person)),
                     Exact(Verdict.parse(verdict), parse_num(amount)),
+                )
+
+            case [
+                person,
+                "is",
+                "the",
+                "only",
+                "innocent" | "criminal" as verdict,
+                *region,
+            ]:
+                verdict_p = Verdict.parse(verdict)
+                return Combined(
+                    Known(Person(person), verdict_p),
+                    RegionClue(Region.parse_region(region), Exact(verdict_p, 1)),
+                )
+
+            case [
+                "I'm",
+                "the",
+                "only",
+                "innocent" | "criminal" as verdict,
+                *region,
+            ]:
+                verdict_p = Verdict.parse(verdict)
+                return Combined(
+                    Known(me, verdict_p),
+                    RegionClue(Region.parse_region(region), Exact(verdict_p, 1)),
                 )
 
             case [
