@@ -439,6 +439,13 @@ class Clue(ABC):
                 total_amount,
                 "innocents" | "criminals" as verdict,
                 *region_is_region,
+            ] | [
+                spec_amount,
+                "of",
+                "the",
+                total_amount,
+                "innocents" | "criminals" as verdict,
+                *region_is_region,
             ]:
                 if "is" in region_is_region:
                     total_region_s, spec_region_s = splitlist(region_is_region, "is")

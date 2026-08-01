@@ -174,6 +174,16 @@ from clues_by_sam.game import Person
                 RegionClue(Column(2), Exact(CRIMINAL, 2)),
             ),
         ),
+        (
+            "1 of the 2 criminals in column B is in between Mary and Quita",
+            Combined(
+                RegionClue(Column(1), Exact(CRIMINAL, 2)),
+                RegionClue(
+                    Overlap(Column(1), Between(Person("Mary"), Person("Quita"))),
+                    Exact(CRIMINAL, 1),
+                ),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
