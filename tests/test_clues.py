@@ -143,6 +143,10 @@ from clues_by_sam.game import Person
             "John has exactly 7 innocent neighbors",
             RegionClue(Neighboring(Person("John")), Exact(INNOCENT, 7)),
         ),
+        (
+            "There's an equal number of innocents in rows 2 and 3",
+            Equal(Row(1), Row(2), INNOCENT),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:

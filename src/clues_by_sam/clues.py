@@ -551,6 +551,24 @@ class Clue(ABC):
                 )
 
             case [
+                "There's",
+                "an",
+                "equal",
+                "number",
+                "of",
+                "innocents" | "criminals" as verdict,
+                "in",
+                "rows" | "columns" as typ,
+                a,
+                "and",
+                b,
+            ]:
+                region_type = Row if typ == "rows" else Column
+                return Equal(
+                    region_type.parse(a), region_type.parse(b), Verdict.parse(verdict)
+                )
+
+            case [
                 a,
                 "has",
                 "more",
