@@ -116,7 +116,7 @@ class AllExcept(Region):
 
 
 @dataclass(frozen=True)
-class Above(ConnectedRegion):
+class Left(ConnectedRegion):
     person: Person
 
     def people(self, field: Field) -> Sequence[Person]:
@@ -125,7 +125,7 @@ class Above(ConnectedRegion):
 
 
 @dataclass(frozen=True)
-class Below(ConnectedRegion):
+class Right(ConnectedRegion):
     person: Person
 
     def people(self, field: Field) -> Sequence[Person]:
@@ -134,21 +134,21 @@ class Below(ConnectedRegion):
 
 
 @dataclass(frozen=True)
-class Left(ConnectedRegion):
-    person: Person
-
-    def people(self, field: Field) -> Sequence[Person]:
-        i, j = field.find(self.person)
-        return field.column(j)[i + 1 :]
-
-
-@dataclass(frozen=True)
-class Right(ConnectedRegion):
+class Above(ConnectedRegion):
     person: Person
 
     def people(self, field: Field) -> Sequence[Person]:
         i, j = field.find(self.person)
         return field.column(j)[:i]
+
+
+@dataclass(frozen=True)
+class Below(ConnectedRegion):
+    person: Person
+
+    def people(self, field: Field) -> Sequence[Person]:
+        i, j = field.find(self.person)
+        return field.column(j)[i + 1 :]
 
 
 @dataclass(frozen=True)
