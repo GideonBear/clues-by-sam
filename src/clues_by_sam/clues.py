@@ -715,6 +715,20 @@ class Clue(ABC):
                     )
                 )
 
+            case [
+                "Both",
+                "innocents" | "criminals" as verdict,
+                *region,
+                "are",
+                "connected",
+            ]:
+                verdict_p = Verdict.parse(verdict)
+                region_p = ConnectedRegion.parse_region(region)
+                return Combined(
+                    RegionClue(region_p, Exact(verdict_p, 2)),
+                    ConnectedRegionClue(region_p, Connected(verdict_p)),
+                )
+
             case _:
                 msg = f"Unknown clue: '{clue_s}'"
                 raise ValueError(msg)

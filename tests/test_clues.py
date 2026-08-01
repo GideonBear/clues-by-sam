@@ -196,6 +196,13 @@ from clues_by_sam.game import Person
                 RegionClue(Right(Person("Quita")), Exact(INNOCENT, 1)),
             ),
         ),
+        (
+            "Both innocents above Wanda are connected",
+            Combined(
+                RegionClue(Above(Person("Wanda")), Exact(INNOCENT, 2)),
+                ConnectedRegionClue(Above(Person("Wanda")), Connected(INNOCENT)),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
