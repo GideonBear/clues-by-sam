@@ -2,7 +2,14 @@
 
 from __future__ import annotations
 
-from playwright.sync_api import Locator, Page, sync_playwright
+import contextlib
+
+from playwright.sync_api import (
+    Locator,
+    Page,
+    TimeoutError as PlaywrightTimeoutError,
+    sync_playwright,
+)
 
 from clues_by_sam.clues import CRIMINAL, INNOCENT, Clue, Known
 from clues_by_sam.game import Field, Person
@@ -26,8 +33,10 @@ def run(url: str) -> None:
 def load_game(
     page: Page,
 ) -> tuple[Field, dict[Person, Locator], list[Known], list[Clue]]:
+    # When on the homepage, there is a start button
     start_button = page.locator(".btn.start")
-    start_button.click()
+    with contextlib.suppress(PlaywrightTimeoutError):
+        start_button.click(timeout=1000)
 
     grid = page.locator("#grid").first
     cards = grid.locator("> *")
