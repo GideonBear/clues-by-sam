@@ -65,6 +65,9 @@ class Region(ABC):
                     found = Between(Person(a), Person(b))
                 case ["neighbor" | "neighbors" | "neighboring", person]:
                     found = Neighboring(Person(person))
+                case [person, "neighbors"] if person.endswith("'s"):
+                    person = person.removesuffix("'s")
+                    found = Neighboring(Person(person))
                 case _:
                     pass
 
