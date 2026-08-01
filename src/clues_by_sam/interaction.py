@@ -11,7 +11,7 @@ from clues_by_sam.game import Field, Person
 from clues_by_sam.mover import Mover
 
 
-def run(url: str = "https://cluesbysam.com") -> None:
+def run(url: str) -> None:
     with sync_playwright() as p:
         browser = p.firefox.launch(headless=False)
         page = browser.new_page()
