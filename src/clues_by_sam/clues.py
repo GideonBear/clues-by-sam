@@ -7,7 +7,7 @@ from functools import reduce
 from string import ascii_uppercase
 from typing import TYPE_CHECKING, Self, override
 
-import z3  # type: ignore[import-untyped]
+import z3  # type: ignore[import-not-found]
 from z3 import And, BoolRef, If, IntNumRef, PbEq, Sum
 
 from clues_by_sam.game import COLUMNS, ROWS, Field, Person

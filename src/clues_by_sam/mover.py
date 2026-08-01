@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from z3 import Bool, Solver, sat, unsat  # type: ignore[import-untyped]
+from z3 import Bool, Solver, sat, unsat  # type: ignore[import-not-found]
 
 from clues_by_sam.clues import Clue, Known, Verdict
 
