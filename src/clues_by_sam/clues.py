@@ -526,6 +526,21 @@ class Clue(ABC):
                     Verdict.parse(verdict),
                 )
 
+            case [
+                a,
+                "has",
+                "more",
+                "innocent" | "criminal" as verdict,
+                "neighbors",
+                "than",
+                b,
+            ]:
+                return More(
+                    Neighboring(Person(a)),
+                    Neighboring(Person(b)),
+                    Verdict.parse(verdict),
+                )
+
             case _:
                 msg = f"Unknown clue: '{clue_s}'"
                 raise ValueError(msg)
@@ -607,5 +622,17 @@ class Equal(Clue):
 
     def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
         return count(self.a.people(field), people, self.verdict) == count(
+            self.b.people(field), people, self.verdict
+        )
+
+
+@dataclass(frozen=True)
+class More(Clue):
+    a: Region
+    b: Region
+    verdict: Verdict
+
+    def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
+        return count(self.a.people(field), people, self.verdict) > count(
             self.b.people(field), people, self.verdict
         )

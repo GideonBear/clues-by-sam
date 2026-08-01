@@ -16,6 +16,7 @@ from clues_by_sam.clues import (
     Edges,
     Equal,
     Exact,
+    More,
     Neighboring,
     Not,
     OnlyOne,
@@ -122,6 +123,10 @@ from clues_by_sam.game import Person
         (
             "Kumar and Will have an equal number of innocent neighbors",
             Equal(Neighboring(Person("Kumar")), Neighboring(Person("Will")), INNOCENT),
+        ),
+        (
+            "Chris has more innocent neighbors than Xavi",
+            More(Neighboring(Person("Chris")), Neighboring(Person("Xavi")), INNOCENT),
         ),
     ],
 )
