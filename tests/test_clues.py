@@ -167,6 +167,13 @@ from clues_by_sam.game import Person
             "There is only one innocent to the left of Carol",
             RegionClue(Left(Person("Carol")), Exact(INNOCENT, 1)),
         ),
+        (
+            "Ollie is one of 2 criminals in column C",
+            Combined(
+                Known(Person("Ollie"), CRIMINAL),
+                RegionClue(Column(2), Exact(CRIMINAL, 2)),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:

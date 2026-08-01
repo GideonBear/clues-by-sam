@@ -533,6 +533,23 @@ class Clue(ABC):
 
             case [
                 person,
+                "is",
+                "one",
+                "of",
+                amount,
+                "innocents" | "criminals" as verdict,
+                *region,
+            ]:
+                verdict_p = Verdict.parse(verdict)
+                return Combined(
+                    Known(Person(person), verdict_p),
+                    RegionClue(
+                        Region.parse_region(region), Exact(verdict_p, parse_num(amount))
+                    ),
+                )
+
+            case [
+                person,
                 "has",
                 "exactly" | "only",
                 amount,
