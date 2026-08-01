@@ -126,6 +126,8 @@ repos:
       - id: mypy
         pass_filenames: false # Check all files to be thorough
         args: [.] # Removes default `--ignore-missing-imports`
+        additional_dependencies:
+          - playwright==1.62.0
 
   - repo: https://github.com/tox-dev/pyproject-fmt
     rev: v2.26.0

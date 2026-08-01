@@ -20,10 +20,10 @@ from clues_by_sam.clues import (
     OnlyOnePerson,
     Overlap,
     Parity,
-    Person,
     RegionClue,
     Row,
 )
+from clues_by_sam.game import Person
 
 
 @pytest.mark.parametrize(
@@ -82,6 +82,7 @@ from clues_by_sam.clues import (
                 RegionClue(Row(1), Exact(INNOCENT, 2)),
                 RegionClue(Row(2), Exact(INNOCENT, 2)),
                 RegionClue(Row(3), Exact(INNOCENT, 2)),
+                RegionClue(Row(4), Exact(INNOCENT, 2)),
             ),
         ),
         (

@@ -1,31 +1,18 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections import UserList
 from dataclasses import dataclass
 from enum import Enum
 from functools import reduce
 from string import ascii_uppercase
 from typing import TYPE_CHECKING, Self, override
 
+from clues_by_sam.game import COLUMNS, ROWS, Field, Person
 from clues_by_sam.utils import splitlist, splitlist_by_subseq
 
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator, Sequence
-
-
-@dataclass(frozen=True)
-class Person:
-    name: str
-
-    def __post_init__(self) -> None:
-        if not self.name[0].isupper() and self.name[1:].islower():
-            msg = f"Invalid person name: '{self.name}'"
-            raise ValueError(msg)
-
-    def __str__(self) -> str:
-        return self.name
+    from collections.abc import Iterable, Sequence
 
 
 class Verdict(Enum):
@@ -46,42 +33,6 @@ class Verdict(Enum):
 
 INNOCENT = Verdict.INNOCENT
 CRIMINAL = Verdict.CRIMINAL
-
-
-ROWS_AND_COLUMNS = 4
-
-
-class Field(UserList[list[Person]]):
-    def find(self, target: Person) -> tuple[int, int]:
-        for i, row in enumerate(self):
-            for j, person in enumerate(row):
-                if person == target:
-                    return i, j
-
-        msg = f"Person '{target}' not in field"
-        raise ValueError(msg)
-
-    def column(self, j: int) -> list[Person]:
-        return [row[j] for row in self]
-
-    def get_columns(self) -> list[list[Person]]:
-        columns: list[list[Person]] = [[]] * self.columns
-        for row in self:
-            for j, person in enumerate(row):
-                columns[j].append(person)
-        return columns
-
-    @property
-    def rows(self) -> int:
-        return len(self)
-
-    @property
-    def columns(self) -> int:
-        return len(self[0])
-
-    def all(self) -> Iterator[Person]:
-        for row in self:
-            yield from row
 
 
 class Region(ABC):
@@ -417,12 +368,13 @@ class Clue(ABC):  # ruff: ignore[abstract-base-class-without-abstract-method] TO
                 "innocents" | "criminals" as verdict,
             ]:
                 region_type = Row if typ == "row" else Column
+                num = ROWS if typ == "row" else COLUMNS
                 return OnlyOne(
                     *(
                         RegionClue(
                             region_type(i), Exact(Verdict.parse(verdict), int(amount))
                         )
-                        for i in range(ROWS_AND_COLUMNS)
+                        for i in range(num)
                     )
                 )
 
@@ -439,6 +391,7 @@ class Clue(ABC):  # ruff: ignore[abstract-base-class-without-abstract-method] TO
                 "innocents" | "criminals" as verdict,
             ] if typ_1.lower() == typ_2:
                 region_type = Row if typ_2 == "row" else Column
+                num = ROWS if typ_2 == "row" else COLUMNS
                 verdict_p = Verdict.parse(verdict)
                 row_or_column_p = region_type.parse(row_or_column)
                 return Combined(
@@ -451,7 +404,7 @@ class Clue(ABC):  # ruff: ignore[abstract-base-class-without-abstract-method] TO
                         else RegionClue(
                             region_type(i), Not(Exact(verdict_p, int(amount)))
                         )
-                        for i in range(ROWS_AND_COLUMNS)
+                        for i in range(num)
                     )
                 )
 

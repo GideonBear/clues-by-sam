@@ -19,7 +19,9 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Typing :: Typed",
 ]
-dependencies = []
+dependencies = [
+    "playwright>=1.62",
+]
 urls.bugs = "https://github.com/GideonBear/clues-by-sam/issues"
 urls.homepage = "https://github.com/GideonBear/clues-by-sam"
 scripts.clues-by-sam = "clues_by_sam.main:main"
@@ -40,6 +42,9 @@ lint.ignore = [
     "CPY",                               # No copyright statements
     "D1",                                # Docstrings should not be enforced by default
     "incorrect-blank-line-before-class", # Choose D203 or D211
+    "line-contains-todo",                # TODO
+    "missing-todo-author",               # TODO
+    "missing-todo-link",                 # TODO
     "missing-trailing-comma",            # Conflict with formatter
     "multi-line-summary-first-line",     # Choose D212 or D213
     "suspicious-subprocess-import",      # Uses of subprocess are rejected, no need to reject the imports as well
