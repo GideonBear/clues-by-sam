@@ -513,6 +513,25 @@ class Clue(ABC):
                 )
 
             case [
+                a,
+                "is",
+                "one",
+                "of",
+                b,
+                amount,
+                "innocent" | "criminal" as verdict,
+                "neighbors",
+            ] if b.endswith("'s"):
+                b = b.removesuffix("'s")
+                verdict_p = Verdict.parse(verdict)
+                return Combined(
+                    Known(Person(a), verdict_p),
+                    RegionClue(
+                        Neighboring(Person(b)), Exact(verdict_p, parse_num(amount))
+                    ),
+                )
+
+            case [
                 person,
                 "has",
                 "exactly",

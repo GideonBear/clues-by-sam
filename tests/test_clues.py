@@ -17,6 +17,7 @@ from clues_by_sam.clues import (
     Edges,
     Equal,
     Exact,
+    Known,
     More,
     Neighboring,
     Not,
@@ -146,6 +147,13 @@ from clues_by_sam.game import Person
         (
             "There's an equal number of innocents in rows 2 and 3",
             Equal(Row(1), Row(2), INNOCENT),
+        ),
+        (
+            "Quita is one of Mark's 4 criminal neighbors",
+            Combined(
+                Known(Person("Quita"), CRIMINAL),
+                RegionClue(Neighboring(Person("Mark")), Exact(CRIMINAL, 4)),
+            ),
         ),
     ],
 )
