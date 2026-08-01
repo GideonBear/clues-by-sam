@@ -12,6 +12,7 @@ from clues_by_sam.clues import (
     Column,
     Combined,
     Connected,
+    ConnectedRegionClue,
     Edges,
     Exact,
     Neighboring,
@@ -48,7 +49,7 @@ from clues_by_sam.game import Person
         ),
         (
             "All innocents below Eve are connected",
-            RegionClue(Below(Person("Eve")), Connected(INNOCENT)),
+            ConnectedRegionClue(Below(Person("Eve")), Connected(INNOCENT)),
         ),
         (
             "Only 1 of the 3 criminals neighboring Martin is on the edges",

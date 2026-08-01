@@ -7,12 +7,15 @@ from functools import reduce
 from string import ascii_uppercase
 from typing import TYPE_CHECKING, Self, override
 
+import z3  # type: ignore[import-untyped]
+from z3 import And, BoolRef, If, PbEq, Sum
+
 from clues_by_sam.game import COLUMNS, ROWS, Field, Person
-from clues_by_sam.utils import splitlist, splitlist_by_subseq
+from clues_by_sam.utils import splitlist
 
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Callable, Iterable, Mapping, Sequence
 
 
 class Verdict(Enum):
@@ -77,6 +80,19 @@ class Region(ABC):
         raise ValueError(msg)
 
 
+class ConnectedRegion(Region, ABC):
+    @abstractmethod
+    def people(self, field: Field) -> Sequence[Person]: ...
+
+    @classmethod
+    def parse_region(cls, region: Sequence[str]) -> ConnectedRegion:
+        region_p = Region.parse_region(region)
+        if not isinstance(region_p, ConnectedRegion):
+            msg = f"Expected a connected region, got: '{" ".join(region)}'"
+            raise ValueError(msg)  # ruff: ignore[type-check-without-type-error]
+        return region_p
+
+
 @dataclass(frozen=True, init=False)
 class Overlap(Region):
     regions: frozenset[Region]
@@ -86,7 +102,7 @@ class Overlap(Region):
 
     def people(self, field: Field) -> Iterable[Person]:
         a: set[Person] = reduce(
-            set.union, (set(region.people(field)) for region in self.regions)
+            set.intersection, (set(region.people(field)) for region in self.regions)
         )
         return a
 
@@ -100,47 +116,47 @@ class AllExcept(Region):
 
 
 @dataclass(frozen=True)
-class Above(Region):
+class Above(ConnectedRegion):
     person: Person
 
-    def people(self, field: Field) -> Iterable[Person]:
+    def people(self, field: Field) -> Sequence[Person]:
         i, j = field.find(self.person)
         return field[i][:j]
 
 
 @dataclass(frozen=True)
-class Below(Region):
+class Below(ConnectedRegion):
     person: Person
 
-    def people(self, field: Field) -> Iterable[Person]:
+    def people(self, field: Field) -> Sequence[Person]:
         i, j = field.find(self.person)
         return field[i][j + 1 :]
 
 
 @dataclass(frozen=True)
-class Left(Region):
+class Left(ConnectedRegion):
     person: Person
 
-    def people(self, field: Field) -> Iterable[Person]:
+    def people(self, field: Field) -> Sequence[Person]:
         i, j = field.find(self.person)
         return field.column(j)[i + 1 :]
 
 
 @dataclass(frozen=True)
-class Right(Region):
+class Right(ConnectedRegion):
     person: Person
 
-    def people(self, field: Field) -> Iterable[Person]:
+    def people(self, field: Field) -> Sequence[Person]:
         i, j = field.find(self.person)
         return field.column(j)[:i]
 
 
 @dataclass(frozen=True)
-class Between(Region):
+class Between(ConnectedRegion):
     a: Person
     b: Person
 
-    def people(self, field: Field) -> Iterable[Person]:
+    def people(self, field: Field) -> Sequence[Person]:
         ai, aj = field.find(self.a)
         bi, bj = field.find(self.b)
         if ai == bi:
@@ -191,10 +207,10 @@ class Edges(Region):
 
 
 @dataclass(frozen=True)
-class Row(Region):
+class Row(ConnectedRegion):
     row: int
 
-    def people(self, field: Field) -> Iterable[Person]:
+    def people(self, field: Field) -> Sequence[Person]:
         return field[self.row]
 
     @classmethod
@@ -203,10 +219,10 @@ class Row(Region):
 
 
 @dataclass(frozen=True)
-class Column(Region):
+class Column(ConnectedRegion):
     column: int
 
-    def people(self, field: Field) -> Iterable[Person]:
+    def people(self, field: Field) -> Sequence[Person]:
         return field.column(self.column)
 
     @classmethod
@@ -214,13 +230,33 @@ class Column(Region):
         return cls(ascii_uppercase.index(column))
 
 
-class Constraint(ABC): ...  # ruff: ignore[abstract-base-class-without-abstract-method] TODO
+class ConnectedConstraint(ABC):
+    @abstractmethod
+    def z3(
+        self, people: Sequence[Person], people_m: Mapping[Person, BoolRef]
+    ) -> BoolRef: ...
+
+
+class Constraint(ConnectedConstraint, ABC):
+    @abstractmethod
+    def z3(
+        self, people: Iterable[Person], people_m: Mapping[Person, BoolRef]
+    ) -> BoolRef: ...
 
 
 @dataclass(frozen=True)
 class Exact(Constraint):
     typ: Verdict
     amount: int
+
+    def z3(
+        self, people: Iterable[Person], people_m: Mapping[Person, BoolRef]
+    ) -> BoolRef:
+        people = tuple(people)
+        count = Sum([If(people_m[person], 1, 0) for person in people])
+        if self.typ == INNOCENT:
+            count = len(people) - count
+        return count == self.amount
 
 
 @dataclass(frozen=True)
@@ -239,18 +275,64 @@ class Parity(Constraint):
             raise ValueError(msg)
         return cls(Verdict.parse(verdict), parity)
 
+    def z3(
+        self, people: Iterable[Person], people_m: Mapping[Person, BoolRef]
+    ) -> BoolRef:
+        people = tuple(people)
+        count = Sum([If(people_m[person], 1, 0) for person in people])
+        if self.typ == INNOCENT:
+            count = len(people) - count
+        return count % 2 == self.parity
+
 
 @dataclass(frozen=True)
-class Connected(Constraint):
+class Connected(ConnectedConstraint):
     typ: Verdict
+
+    def z3(
+        self, people: Sequence[Person], people_m: Mapping[Person, BoolRef]
+    ) -> BoolRef:
+        constraints = []
+        for i in range(len(people)):
+            for j in range(i + 1, len(people)):
+                for k in range(j + 1, len(people)):
+                    if self.typ == CRIMINAL:
+                        constraints.append(
+                            Not(
+                                And(
+                                    people_m[people[i]],
+                                    z3.Not(people_m[people[j]]),
+                                    people_m[people[k]],
+                                )
+                            )
+                        )
+                    else:
+                        constraints.append(
+                            Not(
+                                And(
+                                    z3.Not(people_m[people[i]]),
+                                    people_m[people[j]],
+                                    z3.Not(people_m[people[k]]),
+                                )
+                            )
+                        )
+        return And(constraints)
 
 
 @dataclass(frozen=True)
 class Not(Constraint):
     constraint: Constraint
 
+    def z3(
+        self, people: Iterable[Person], people_m: Mapping[Person, BoolRef]
+    ) -> BoolRef:
+        return z3.Not(self.constraint.z3(people, people_m))
 
-class Clue(ABC):  # ruff: ignore[abstract-base-class-without-abstract-method] TODO
+
+class Clue(ABC):
+    @abstractmethod
+    def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef: ...
+
     @classmethod
     def parse(cls, clue_s: str) -> Clue:  # ruff: ignore[complex-structure, too-many-branches, too-many-locals, too-many-return-statements]
         clue = clue_s.split()
@@ -322,8 +404,9 @@ class Clue(ABC):  # ruff: ignore[abstract-base-class-without-abstract-method] TO
                 "are",
                 "connected",
             ]:
-                return RegionClue(
-                    Region.parse_region(region), Connected(Verdict.parse(verdict))
+                return ConnectedRegionClue(
+                    ConnectedRegion.parse_region(region),
+                    Connected(Verdict.parse(verdict)),
                 )
 
             case [
@@ -337,13 +420,11 @@ class Clue(ABC):  # ruff: ignore[abstract-base-class-without-abstract-method] TO
             ]:
                 if "is" in region_is_region:
                     total_region_s, spec_region_s = splitlist(region_is_region, "is")
-                elif "are" in region_is_region and "in" in region_is_region:
-                    total_region_s, spec_region_s = splitlist_by_subseq(
-                        region_is_region, ("are", "in")
-                    )
+                elif "are" in region_is_region:
+                    total_region_s, spec_region_s = splitlist(region_is_region, "are")
                 else:
                     msg = (
-                        f"Expected to find 'is' or 'are in' in this combined clue: "
+                        f"Expected to find 'is' or 'are' in this combined clue: "
                         f"'{clue_s}'"
                     )
                     raise ValueError(msg)
@@ -437,11 +518,18 @@ class Combined(Clue):
     def __init__(self, *clues: Clue) -> None:
         object.__setattr__(self, "clues", frozenset(clues))
 
+    def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
+        return And([clue.z3(field, people) for clue in self.clues])
+
 
 @dataclass(frozen=True)
 class Known(Clue):
     person: Person
     verdict: Verdict
+
+    @override
+    def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
+        return people[self.person] == self.verdict.value
 
 
 @dataclass(frozen=True)
@@ -449,12 +537,35 @@ class RegionClue(Clue):
     region: Region
     constraint: Constraint
 
+    def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
+        return self.constraint.z3(self.region.people(field), people)
+
+
+@dataclass(frozen=True)
+class ConnectedRegionClue(Clue):
+    region: ConnectedRegion
+    constraint: ConnectedConstraint
+
+    def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
+        return self.constraint.z3(self.region.people(field), people)
+
 
 @dataclass(frozen=True)
 class OnlyOnePerson(Clue):
     region: Region
-    personal_region: type[Region]
+    personal_region: Callable[[Person], Region]
     constraint: Constraint
+
+    def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
+        return PbEq(
+            [
+                RegionClue(self.personal_region(person), self.constraint).z3(
+                    field, people
+                )
+                for person in self.region.people(field)
+            ],
+            1,
+        )
 
 
 @dataclass(frozen=True, init=False)
@@ -463,3 +574,6 @@ class OnlyOne(Clue):
 
     def __init__(self, *clues: Clue) -> None:
         object.__setattr__(self, "clues", frozenset(clues))
+
+    def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
+        return PbEq([(clue.z3(field, people), 1) for clue in self.clues], 1)

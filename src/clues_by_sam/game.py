@@ -8,8 +8,6 @@ from typing import TYPE_CHECKING, Self
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from clues_by_sam.clues import Clue, Known
-
 
 @dataclass(frozen=True)
 class Person:
@@ -66,16 +64,3 @@ class Field(UserList[list[Person]]):
             msg = "Field is not 5x4"
             raise ValueError(msg)
         return cls(people[i * COLUMNS : (i + 1) * COLUMNS] for i in range(ROWS))
-
-
-class Game:
-    def __init__(self, field: Field) -> None:
-        self.field = field
-        self.knowns: list[Known] = []
-        self.clues: list[Clue] = []
-
-    def add_known(self, known: Known) -> None:
-        self.knowns.append(known)
-
-    def add_clue(self, clue: Clue) -> None:
-        self.clues.append(clue)

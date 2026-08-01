@@ -21,6 +21,7 @@ classifiers = [
 ]
 dependencies = [
     "playwright>=1.62",
+    "z3-solver>=5",
 ]
 urls.bugs = "https://github.com/GideonBear/clues-by-sam/issues"
 urls.homepage = "https://github.com/GideonBear/clues-by-sam"
@@ -61,6 +62,9 @@ lint.isort.combine-as-imports = true
 lint.isort.lines-after-imports = 2
 lint.isort.required-imports = [ "from __future__ import annotations" ]
 lint.preview = true
+
+[tool.deptry]
+package_module_name_map.z3-solver = "z3"
 
 [tool.pyproject-fmt]
 indent = 4

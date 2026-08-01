@@ -128,6 +128,7 @@ repos:
         args: [.] # Removes default `--ignore-missing-imports`
         additional_dependencies:
           - playwright==1.62.0
+          - z3-solver==5.0.0.0
 
   - repo: https://github.com/tox-dev/pyproject-fmt
     rev: v2.26.0
