@@ -246,6 +246,15 @@ from clues_by_sam.game import Person, Profession
                 Exact(INNOCENT, 1),
             ),
         ),
+        (
+            "Wanda has more criminal than innocent neighbors",
+            More(
+                Neighboring(Person("Wanda")),
+                CRIMINAL,
+                Neighboring(Person("Wanda")),
+                INNOCENT,
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:

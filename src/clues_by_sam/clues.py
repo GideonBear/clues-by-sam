@@ -813,6 +813,22 @@ class Clue(ABC):
                     ConnectedRegionClue(region_p, Connected(verdict_p)),
                 )
 
+            case [
+                person,
+                "has",
+                "more",
+                "innocent" | "criminal" as a_verdict,
+                "than",
+                "innocent" | "criminal" as b_verdict,
+                "neighbors",
+            ]:
+                return More(
+                    Neighboring(Person(person)),
+                    Verdict.parse(a_verdict),
+                    Neighboring(Person(person)),
+                    Verdict.parse(b_verdict),
+                )
+
             case (
                 [
                     amount,
