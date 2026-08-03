@@ -43,9 +43,6 @@ lint.ignore = [
     "CPY",                               # No copyright statements
     "D1",                                # Docstrings should not be enforced by default
     "incorrect-blank-line-before-class", # Choose D203 or D211
-    "line-contains-todo",                # TODO
-    "missing-todo-author",               # TODO
-    "missing-todo-link",                 # TODO
     "missing-trailing-comma",            # Conflict with formatter
     "multi-line-summary-first-line",     # Choose D212 or D213
     "suspicious-subprocess-import",      # Uses of subprocess are rejected, no need to reject the imports as well

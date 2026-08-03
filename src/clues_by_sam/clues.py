@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Self, override
 import z3  # type: ignore[import-not-found]
 from z3 import And, BoolRef, If, IntNumRef, PbEq, Sum
 
-from clues_by_sam.game import COLUMNS, ROWS, Field, Person
+from clues_by_sam.game import COLUMNS, ROWS, Field, Person, Profession
 from clues_by_sam.utils import splitlist
 
 
@@ -116,6 +116,18 @@ class AllExcept(Region):
 
     def people(self, field: Field) -> Iterable[Person]:
         return set(field.all()) - set(self.exception.people(field))
+
+
+@dataclass(frozen=True)
+class ProfessionRegion(Region):
+    profession: Profession
+
+    def people(self, field: Field) -> Iterable[Person]:
+        return (
+            person
+            for person in field.all()
+            if field.professions[person] == self.profession
+        )
 
 
 @dataclass(frozen=True)
@@ -231,6 +243,54 @@ class Column(ConnectedRegion):
     @classmethod
     def parse(cls, column: str) -> Self:
         return cls(ascii_uppercase.index(column))
+
+
+@dataclass(frozen=True)
+class DirectlyLeft(Region):
+    region: Region
+
+    def people(self, field: Field) -> Iterable[Person]:
+        for person in self.region.people(field):
+            i, j = field.find(person)
+            if j == 0:
+                continue
+            yield field[i][j - 1]
+
+
+@dataclass(frozen=True)
+class DirectlyRight(Region):
+    region: Region
+
+    def people(self, field: Field) -> Iterable[Person]:
+        for person in self.region.people(field):
+            i, j = field.find(person)
+            if j == field.columns - 1:
+                continue
+            yield field[i][j + 1]
+
+
+@dataclass(frozen=True)
+class DirectlyAbove(Region):
+    region: Region
+
+    def people(self, field: Field) -> Iterable[Person]:
+        for person in self.region.people(field):
+            i, j = field.find(person)
+            if i == 0:
+                continue
+            yield field[i - 1][j]
+
+
+@dataclass(frozen=True)
+class DirectlyBelow(Region):
+    region: Region
+
+    def people(self, field: Field) -> Iterable[Person]:
+        for person in self.region.people(field):
+            i, j = field.find(person)
+            if i == field.rows - 1:
+                continue
+            yield field[i + 1][j]
 
 
 class ConnectedConstraint(ABC):
@@ -727,6 +787,47 @@ class Clue(ABC):
                 return Combined(
                     RegionClue(region_p, Exact(verdict_p, 2)),
                     ConnectedRegionClue(region_p, Connected(verdict_p)),
+                )
+
+            case [
+                amount,
+                profession,
+                "has" | "have",
+                "a" | "an",
+                "innocent" | "criminal" as verdict,
+                "directly",
+                *direction,
+                "them",
+            ] | [
+                "Only" | "Exactly",
+                amount,
+                profession,
+                "has" | "have",
+                "a" | "an",
+                "innocent" | "criminal" as verdict,
+                "directly",
+                *direction,
+                "them",
+            ]:
+                direction_type: Callable[[Region], Region]
+                match direction:
+                    case ["above"]:
+                        direction_type = DirectlyAbove
+                    case ["below"]:
+                        direction_type = DirectlyBelow
+                    case ["to", "the", "left"]:
+                        direction_type = DirectlyLeft
+                    case ["to", "the", "right"]:
+                        direction_type = DirectlyRight
+                    case _:
+                        msg = f"Unknown direction for 'directly ...': {direction}"
+                        raise ValueError(msg)
+
+                return RegionClue(
+                    direction_type(
+                        ProfessionRegion(Profession(profession.removesuffix("s")))
+                    ),
+                    Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
             case _:

@@ -12,7 +12,7 @@ from playwright.sync_api import (
 )
 
 from clues_by_sam.clues import CRIMINAL, INNOCENT, Clue, Known
-from clues_by_sam.game import Field, Person
+from clues_by_sam.game import Field, Person, Profession
 from clues_by_sam.mover import Mover
 
 
@@ -41,16 +41,18 @@ def load_game(
     grid = page.locator("#grid").first
     cards = grid.locator("> *")
     people = {}
+    professions = {}
     knowns = []
     clues = []
     for i in range(cards.count()):
         card = cards.nth(i).locator(".card").first
-        person, card_knowns, card_clues = process_card(card)
+        person, profession, card_knowns, card_clues = process_card(card)
         knowns.extend(card_knowns)
         clues.extend(card_clues)
         people[person] = card
+        professions[person] = profession
 
-    field = Field.from_list(list(people.keys()))
+    field = Field.from_list(list(people.keys()), professions)
 
     return field, people, knowns, clues
 
@@ -77,7 +79,7 @@ def play_game(
         else:
             page.locator(".btn-criminal").click()
 
-        card_person, card_knowns, card_clues = process_card(card)
+        card_person, _card_profession, card_knowns, card_clues = process_card(card)
         if card_person != move.person:
             raise AssertionError
         if card_knowns != [move]:
@@ -85,18 +87,18 @@ def play_game(
         mover.add_clues(card_clues)
 
 
-def process_card(card: Locator) -> tuple[Person, list[Known], list[Clue]]:
+def process_card(card: Locator) -> tuple[Person, Profession, list[Known], list[Clue]]:
     classes_s = card.get_attribute("class")
     assert classes_s is not None
     classes = classes_s.split()
     name = card.locator("h3.name").text_content()
     assert name is not None
     name = name.capitalize()
-    profession = card.locator("p.profession").text_content()
-    # TODO: profession
-    assert profession is not None
-
     person = Person(name)
+
+    profession_s = card.locator("p.profession").text_content()
+    assert profession_s is not None
+    profession = Profession(profession_s)
 
     knowns = []
     if "innocent" in classes:
@@ -110,4 +112,4 @@ def process_card(card: Locator) -> tuple[Person, list[Known], list[Clue]]:
         assert hint is not None
         clues.append(Clue.parse(hint, person))
 
-    return person, knowns, clues
+    return person, profession, knowns, clues

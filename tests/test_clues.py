@@ -14,6 +14,7 @@ from clues_by_sam.clues import (
     Combined,
     Connected,
     ConnectedRegionClue,
+    DirectlyBelow,
     Edges,
     Equal,
     Exact,
@@ -26,11 +27,12 @@ from clues_by_sam.clues import (
     OnlyOnePerson,
     Overlap,
     Parity,
+    ProfessionRegion,
     RegionClue,
     Right,
     Row,
 )
-from clues_by_sam.game import Person
+from clues_by_sam.game import Person, Profession
 
 
 @pytest.mark.parametrize(
@@ -201,6 +203,12 @@ from clues_by_sam.game import Person
             Combined(
                 RegionClue(Above(Person("Wanda")), Exact(INNOCENT, 2)),
                 ConnectedRegionClue(Above(Person("Wanda")), Connected(INNOCENT)),
+            ),
+        ),
+        (
+            "2 mechs have a criminal directly below them",
+            RegionClue(
+                DirectlyBelow(ProfessionRegion(Profession("mech"))), Exact(CRIMINAL, 2)
             ),
         ),
     ],
