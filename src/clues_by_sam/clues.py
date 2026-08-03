@@ -831,6 +831,26 @@ class Clue(ABC):
                     Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
+            case [
+                "There",
+                "are",
+                "as",
+                "many",
+                "innocent" | "criminal" as a_verdict,
+                a_profession,
+                "as",
+                "there",
+                "are",
+                "innocent" | "criminal" as b_verdict,
+                b_profession,
+            ]:
+                return Equal(
+                    ProfessionRegion(Profession(a_profession.removesuffix("s"))),
+                    Verdict.parse(a_verdict),
+                    ProfessionRegion(Profession(b_profession.removesuffix("s"))),
+                    Verdict.parse(b_verdict),
+                )
+
             case _:
                 msg = f"Unknown clue: '{clue_s}'"
                 raise ValueError(msg)

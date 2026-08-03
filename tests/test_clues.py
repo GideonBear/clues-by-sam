@@ -221,6 +221,15 @@ from clues_by_sam.game import Person, Profession
                 DirectlyBelow(ProfessionRegion(Profession("mech"))), Exact(CRIMINAL, 2)
             ),
         ),
+        (
+            "There are as many criminal builders as there are criminal coders",
+            Equal(
+                ProfessionRegion(Profession("builder")),
+                CRIMINAL,
+                ProfessionRegion(Profession("coder")),
+                CRIMINAL,
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
