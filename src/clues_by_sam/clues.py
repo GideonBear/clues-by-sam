@@ -44,6 +44,8 @@ class Region(ABC):
 
     @classmethod
     def parse_region(cls, region: Sequence[str], me: Person) -> Region:  # ruff: ignore[complex-structure, too-many-branches]
+        if region[0] in {"is", "are", "also"}:
+            region = region[1:]
         for i in range(1, len(region) + 1):
             found: Region | None = None
             match region[:i]:
@@ -81,8 +83,6 @@ class Region(ABC):
                 rest = region[i:]
                 if len(rest) == 0:
                     return found
-                if rest[0] == "is":
-                    rest = rest[1:]
                 return Overlap(found, cls.parse_region(rest, me))
 
         msg = f"Unknown region: '{" ".join(region)}'"
@@ -650,6 +650,30 @@ class Clue(ABC):
                 verdict_p = Verdict.parse(verdict)
                 return Combined(
                     RegionClue(total_region, Exact(verdict_p, parse_num(total_amount))),
+                    RegionClue(
+                        Overlap(total_region, spec_region),
+                        Exact(verdict_p, parse_num(spec_amount)),
+                    ),
+                )
+
+            case [
+                "Exactly" | "Only",
+                spec_amount,
+                "of",
+                total_person,
+                total_amount,
+                "innocent" | "criminal" as verdict,
+                "neighbors",
+                *spec_region_s,
+            ] if total_person.endswith("'s"):
+                total_region = Neighboring(Person(total_person.removesuffix("'s")))
+                spec_region = Region.parse_region(spec_region_s, me)
+                verdict_p = Verdict.parse(verdict)
+                return Combined(
+                    RegionClue(
+                        total_region,
+                        Exact(verdict_p, parse_num(total_amount)),
+                    ),
                     RegionClue(
                         Overlap(total_region, spec_region),
                         Exact(verdict_p, parse_num(spec_amount)),

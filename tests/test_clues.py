@@ -294,6 +294,16 @@ from clues_by_sam.game import Person, Profession
                 0, Row(4), SimplePersonConstraint(Neighboring, AtLeast(INNOCENT, 3))
             ),
         ),
+        (
+            "Exactly 3 of Henry's 6 criminal neighbors also neighbor Barb",
+            Combined(
+                RegionClue(Neighboring(Person("Henry")), Exact(CRIMINAL, 6)),
+                RegionClue(
+                    Overlap(Neighboring(Person("Henry")), Neighboring(Person("Barb"))),
+                    Exact(CRIMINAL, 3),
+                ),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
