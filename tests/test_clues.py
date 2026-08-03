@@ -14,6 +14,7 @@ from clues_by_sam.clues import (
     Between,
     Clue,
     Column,
+    ColumnOf,
     Combined,
     ConditionalPersonConstraint,
     Connected,
@@ -280,6 +281,13 @@ from clues_by_sam.game import Person, Profession
             ),
         ),
         ("There are 8 innocents in total", RegionClue(All(), Exact(INNOCENT, 8))),
+        (
+            "I'm one of 2 criminals in my column",
+            Combined(
+                Known(Person("Me"), CRIMINAL),
+                RegionClue(ColumnOf(Person("Me")), Exact(CRIMINAL, 2)),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:

@@ -43,7 +43,7 @@ class Region(ABC):
     def people(self, field: Field) -> Iterable[Person]: ...
 
     @classmethod
-    def parse_region(cls, region: Sequence[str]) -> Region:  # ruff: ignore[complex-structure, too-many-branches]
+    def parse_region(cls, region: Sequence[str], me: Person) -> Region:  # ruff: ignore[complex-structure, too-many-branches]
         for i in range(1, len(region) + 1):
             found: Region | None = None
             match region[:i]:
@@ -55,6 +55,10 @@ class Region(ABC):
                     found = Column.parse(column)
                 case ["in", "row", row] | ["row", row]:
                     found = Row.parse(row)
+                case ["in", "my", "column"]:
+                    found = ColumnOf(me)
+                case ["in", "my", "row"]:
+                    found = RowOf(me)
                 case ["above", person]:
                     found = Above(Person(person))
                 case ["below", person]:
@@ -79,7 +83,7 @@ class Region(ABC):
                     return found
                 if rest[0] == "is":
                     rest = rest[1:]
-                return Overlap(found, cls.parse_region(rest))
+                return Overlap(found, cls.parse_region(rest, me))
 
         msg = f"Unknown region: '{" ".join(region)}'"
         raise ValueError(msg)
@@ -90,8 +94,8 @@ class ConnectedRegion(Region, ABC):
     def people(self, field: Field) -> Sequence[Person]: ...
 
     @classmethod
-    def parse_region(cls, region: Sequence[str]) -> ConnectedRegion:
-        region_p = Region.parse_region(region)
+    def parse_region(cls, region: Sequence[str], me: Person) -> ConnectedRegion:
+        region_p = Region.parse_region(region, me)
         if not isinstance(region_p, ConnectedRegion):
             msg = f"Expected a connected region, got: '{" ".join(region)}'"
             raise ValueError(msg)  # ruff: ignore[type-check-without-type-error]
@@ -261,6 +265,24 @@ class Column(ConnectedRegion):
     @classmethod
     def parse(cls, column: str) -> Self:
         return cls(ascii_uppercase.index(column))
+
+
+@dataclass(frozen=True)
+class RowOf(ConnectedRegion):
+    person: Person
+
+    def people(self, field: Field) -> Sequence[Person]:
+        i, _j = field.find(self.person)
+        return Row(i).people(field)
+
+
+@dataclass(frozen=True)
+class ColumnOf(ConnectedRegion):
+    person: Person
+
+    def people(self, field: Field) -> Sequence[Person]:
+        _i, j = field.find(self.person)
+        return Column(j).people(field)
 
 
 @dataclass(frozen=True)
@@ -516,7 +538,7 @@ class Clue(ABC):
                 "them",
             ]:
                 amount_p = parse_num(amount)
-                a_region_p = Region.parse_region(a_region)
+                a_region_p = Region.parse_region(a_region, me)
                 b_verdict_p = Verdict.parse(b_verdict)
 
                 if a_verdict in {"person", "people"}:
@@ -549,7 +571,7 @@ class Clue(ABC):
                 *region,
             ]:
                 return RegionClue(
-                    Region.parse_region(region),
+                    Region.parse_region(region, me),
                     Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
@@ -582,7 +604,7 @@ class Clue(ABC):
                 ]
             ):
                 return RegionClue(
-                    Region.parse_region(region), Parity.parse(verdict, parity)
+                    Region.parse_region(region, me), Parity.parse(verdict, parity)
                 )
 
             case [
@@ -593,7 +615,7 @@ class Clue(ABC):
                 "connected",
             ]:
                 return ConnectedRegionClue(
-                    ConnectedRegion.parse_region(region),
+                    ConnectedRegion.parse_region(region, me),
                     Connected(Verdict.parse(verdict)),
                 )
 
@@ -623,8 +645,8 @@ class Clue(ABC):
                         f"'{clue_s}'"
                     )
                     raise ValueError(msg)
-                total_region = Region.parse_region(total_region_s)
-                spec_region = Region.parse_region(spec_region_s)
+                total_region = Region.parse_region(total_region_s, me)
+                spec_region = Region.parse_region(spec_region_s, me)
                 verdict_p = Verdict.parse(verdict)
                 return Combined(
                     RegionClue(total_region, Exact(verdict_p, parse_num(total_amount))),
@@ -740,7 +762,8 @@ class Clue(ABC):
                 return Combined(
                     Known(Person(person), verdict_p),
                     RegionClue(
-                        Region.parse_region(region), Exact(verdict_p, parse_num(amount))
+                        Region.parse_region(region, me),
+                        Exact(verdict_p, parse_num(amount)),
                     ),
                 )
 
@@ -768,7 +791,7 @@ class Clue(ABC):
                 verdict_p = Verdict.parse(verdict)
                 return Combined(
                     Known(Person(person), verdict_p),
-                    RegionClue(Region.parse_region(region), Exact(verdict_p, 1)),
+                    RegionClue(Region.parse_region(region, me), Exact(verdict_p, 1)),
                 )
 
             case [
@@ -781,7 +804,24 @@ class Clue(ABC):
                 verdict_p = Verdict.parse(verdict)
                 return Combined(
                     Known(me, verdict_p),
-                    RegionClue(Region.parse_region(region), Exact(verdict_p, 1)),
+                    RegionClue(Region.parse_region(region, me), Exact(verdict_p, 1)),
+                )
+
+            case [
+                "I'm",
+                "one",
+                "of",
+                amount,
+                "innocents" | "criminals" as verdict,
+                *region,
+            ]:
+                verdict_p = Verdict.parse(verdict)
+                return Combined(
+                    Known(me, verdict_p),
+                    RegionClue(
+                        Region.parse_region(region, me),
+                        Exact(verdict_p, parse_num(amount)),
+                    ),
                 )
 
             case [
@@ -797,7 +837,7 @@ class Clue(ABC):
             ]:
                 return OnlyXPeople(
                     parse_num(a_amount),
-                    Region.parse_region(region),
+                    Region.parse_region(region, me),
                     SimplePersonConstraint(
                         Neighboring, Exact(Verdict.parse(verdict), parse_num(b_amount))
                     ),
@@ -849,9 +889,9 @@ class Clue(ABC):
                 region_a, region_b = splitlist(region_than_region, "than")
                 verdict_p = Verdict.parse(verdict)
                 return More(
-                    Region.parse_region(region_a),
+                    Region.parse_region(region_a, me),
                     verdict_p,
-                    Region.parse_region(region_b),
+                    Region.parse_region(region_b, me),
                     verdict_p,
                 )
 
@@ -915,7 +955,7 @@ class Clue(ABC):
                 "connected",
             ]:
                 verdict_p = Verdict.parse(verdict)
-                region_p = ConnectedRegion.parse_region(region)
+                region_p = ConnectedRegion.parse_region(region, me)
                 return Combined(
                     RegionClue(region_p, Exact(verdict_p, 2)),
                     ConnectedRegionClue(region_p, Connected(verdict_p)),
@@ -1046,7 +1086,7 @@ class Clue(ABC):
                 *region,
             ]:
                 return RegionClue(
-                    Region.parse_region(region),
+                    Region.parse_region(region, me),
                     Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
