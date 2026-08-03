@@ -684,10 +684,9 @@ class Clue(ABC):
                 "innocent" | "criminal" as verdict,
                 "neighbors",
             ]:
+                verdict_p = Verdict.parse(verdict)
                 return Equal(
-                    Neighboring(Person(a)),
-                    Neighboring(Person(b)),
-                    Verdict.parse(verdict),
+                    Neighboring(Person(a)), verdict_p, Neighboring(Person(b)), verdict_p
                 )
 
             case [
@@ -704,8 +703,9 @@ class Clue(ABC):
                 b,
             ]:
                 region_type = Row if typ == "rows" else Column
+                verdict_p = Verdict.parse(verdict)
                 return Equal(
-                    region_type.parse(a), region_type.parse(b), Verdict.parse(verdict)
+                    region_type.parse(a), verdict_p, region_type.parse(b), verdict_p
                 )
 
             case [
@@ -716,10 +716,12 @@ class Clue(ABC):
                 *region_than_region,
             ] if "than" in region_than_region:
                 region_a, region_b = splitlist(region_than_region, "than")
+                verdict_p = Verdict.parse(verdict)
                 return More(
                     Region.parse_region(region_a),
+                    verdict_p,
                     Region.parse_region(region_b),
-                    Verdict.parse(verdict),
+                    verdict_p,
                 )
 
             case [
@@ -731,10 +733,9 @@ class Clue(ABC):
                 "than",
                 b,
             ]:
+                verdict_p = Verdict.parse(verdict)
                 return More(
-                    Neighboring(Person(a)),
-                    Neighboring(Person(b)),
-                    Verdict.parse(verdict),
+                    Neighboring(Person(a)), verdict_p, Neighboring(Person(b)), verdict_p
                 )
 
             case [
@@ -909,22 +910,24 @@ class OnlyOne(Clue):
 @dataclass(frozen=True)
 class Equal(Clue):
     a: Region
+    a_verdict: Verdict
     b: Region
-    verdict: Verdict
+    b_verdict: Verdict
 
     def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
-        return count(self.a.people(field), people, self.verdict) == count(
-            self.b.people(field), people, self.verdict
+        return count(self.a.people(field), people, self.a_verdict) == count(
+            self.b.people(field), people, self.b_verdict
         )
 
 
 @dataclass(frozen=True)
 class More(Clue):
     a: Region
+    a_verdict: Verdict
     b: Region
-    verdict: Verdict
+    b_verdict: Verdict
 
     def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
-        return count(self.a.people(field), people, self.verdict) > count(
-            self.b.people(field), people, self.verdict
+        return count(self.a.people(field), people, self.a_verdict) > count(
+            self.b.people(field), people, self.b_verdict
         )

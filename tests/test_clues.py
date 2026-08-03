@@ -128,11 +128,21 @@ from clues_by_sam.game import Person, Profession
         ),
         (
             "Kumar and Will have an equal number of innocent neighbors",
-            Equal(Neighboring(Person("Kumar")), Neighboring(Person("Will")), INNOCENT),
+            Equal(
+                Neighboring(Person("Kumar")),
+                INNOCENT,
+                Neighboring(Person("Will")),
+                INNOCENT,
+            ),
         ),
         (
             "Chris has more innocent neighbors than Xavi",
-            More(Neighboring(Person("Chris")), Neighboring(Person("Xavi")), INNOCENT),
+            More(
+                Neighboring(Person("Chris")),
+                INNOCENT,
+                Neighboring(Person("Xavi")),
+                INNOCENT,
+            ),
         ),
         (
             "Each row has at least 3 innocents",
@@ -150,7 +160,7 @@ from clues_by_sam.game import Person, Profession
         ),
         (
             "There's an equal number of innocents in rows 2 and 3",
-            Equal(Row(1), Row(2), INNOCENT),
+            Equal(Row(1), INNOCENT, Row(2), INNOCENT),
         ),
         (
             "Quita is one of Mark's 4 criminal neighbors",
@@ -189,7 +199,7 @@ from clues_by_sam.game import Person, Profession
         ),
         (
             "There are more innocents in column A than column B",
-            More(Column(0), Column(1), INNOCENT),
+            More(Column(0), INNOCENT, Column(1), INNOCENT),
         ),
         (
             "I'm the only innocent to the right of Quita",
