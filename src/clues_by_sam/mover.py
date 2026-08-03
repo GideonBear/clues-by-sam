@@ -20,8 +20,7 @@ class Mover:
         self.people = {person: Bool(person.name) for person in field.all()}
         self.unknowns = set(field.all())
         for known in knowns:
-            self.unknowns.remove(known.person)
-            self.solver.add(self.people[known.person] == known.verdict.value)
+            self.add_known(known)
 
     def add_clues(self, clues: Iterable[Clue]) -> None:
         for clue in clues:
@@ -31,6 +30,10 @@ class Mover:
             msg = "Unsatisfiable"
             raise ValueError(msg)
 
+    def add_known(self, known: Known) -> None:
+        self.unknowns.remove(known.person)
+        self.solver.add(known.z3(self.field, self.people))
+
     def get_move(self) -> Known | None:
         for unknown in self.unknowns:
             for verdict in [False, True]:
@@ -38,9 +41,9 @@ class Mover:
                 self.solver.add(self.people[unknown] == verdict)
                 if self.solver.check() == unsat:
                     self.solver.pop()
-                    self.solver.add(self.people[unknown] == (not verdict))
-                    self.unknowns.remove(unknown)
-                    return Known(unknown, Verdict(not verdict))
+                    known = Known(unknown, Verdict(not verdict))
+                    self.add_known(known)
+                    return known
                 self.solver.pop()
 
         return None
