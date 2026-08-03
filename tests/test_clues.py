@@ -270,6 +270,14 @@ from clues_by_sam.game import Person, Profession
                 ConditionalPersonConstraint(ANY, Exact(INNOCENT, 1), CRIMINAL),
             ),
         ),
+        (
+            "Only one cook has exactly 6 criminal neighbors",
+            OnlyXPeople(
+                1,
+                ProfessionRegion(Profession("cook")),
+                SimplePersonConstraint(Neighboring, Exact(CRIMINAL, 6)),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:

@@ -997,6 +997,25 @@ class Clue(ABC):
                 )
 
             case [
+                "Exactly" | "Only",
+                a_amount,
+                a_profession,
+                "has",
+                "exactly" | "only",
+                b_amount,
+                "innocent" | "criminal" as b_verdict,
+                "neighbor" | "neighbors",
+            ]:
+                return OnlyXPeople(
+                    parse_num(a_amount),
+                    ProfessionRegion(Profession(a_profession.removesuffix("s"))),
+                    SimplePersonConstraint(
+                        Neighboring,
+                        Exact(Verdict.parse(b_verdict), parse_num(b_amount)),
+                    ),
+                )
+
+            case [
                 "There",
                 "are",
                 "as",
