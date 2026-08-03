@@ -53,6 +53,8 @@ class Region(ABC):
                     found = All()
                 case ["on", "the", "edges"]:
                     found = Edges()
+                case ["in", "the", "corners"]:
+                    found = Corners()
                 case ["in", "column", column] | ["column", column]:
                     found = Column.parse(column)
                 case ["in", "row", row] | ["row", row]:
@@ -240,6 +242,18 @@ class Edges(Region):
             | {field[i][field.columns - 1] for i in range(field.rows)}
             | {field[0][j] for j in range(field.columns)}
             | {field[field.rows - 1][j] for j in range(field.columns)}
+        )
+
+
+@dataclass(frozen=True)
+class Corners(Region):
+    @override
+    def people(self, field: Field) -> Iterable[Person]:
+        return (
+            field[0][0],
+            field[0][field.columns - 1],
+            field[field.rows - 1][0],
+            field[field.rows - 1][field.columns - 1],
         )
 
 
