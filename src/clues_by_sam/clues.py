@@ -446,6 +446,8 @@ class Not(Constraint):
 
 
 def parse_num(s: str) -> int:
+    if s == "no":
+        return 0
     if s == "one":
         return 1
     return int(s)
