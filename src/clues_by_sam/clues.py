@@ -813,26 +813,54 @@ class Clue(ABC):
                     ConnectedRegionClue(region_p, Connected(verdict_p)),
                 )
 
-            case [
-                amount,
-                profession,
-                "has" | "have",
-                "a" | "an",
-                "innocent" | "criminal" as verdict,
-                "directly",
-                *direction,
-                "them",
-            ] | [
-                "Only" | "Exactly",
-                amount,
-                profession,
-                "has" | "have",
-                "a" | "an",
-                "innocent" | "criminal" as verdict,
-                "directly",
-                *direction,
-                "them",
-            ]:
+            case (
+                [
+                    amount,
+                    profession,
+                    "has" | "have",
+                    "a" | "an",
+                    "innocent" | "criminal" as verdict,
+                    "directly",
+                    *direction,
+                    "them",
+                ]
+                | [
+                    "Only" | "Exactly",
+                    amount,
+                    profession,
+                    "has" | "have",
+                    "a" | "an",
+                    "innocent" | "criminal" as verdict,
+                    "directly",
+                    *direction,
+                    "them",
+                ]
+                | [
+                    amount,
+                    "of",
+                    "us",
+                    profession,
+                    "has" | "have",
+                    "a" | "an",
+                    "innocent" | "criminal" as verdict,
+                    "directly",
+                    *direction,
+                    "us",
+                ]
+                | [
+                    "Only" | "Exactly",
+                    amount,
+                    "of",
+                    "us",
+                    profession,
+                    "has" | "have",
+                    "a" | "an",
+                    "innocent" | "criminal" as verdict,
+                    "directly",
+                    *direction,
+                    "us",
+                ]
+            ):
                 direction_type: Callable[[Region], Region]
                 match direction:
                     case ["above"]:
