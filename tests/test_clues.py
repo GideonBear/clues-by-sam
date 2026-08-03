@@ -304,6 +304,11 @@ from clues_by_sam.game import Person, Profession
                 ),
             ),
         ),
+        (
+            "4 persons on the edges have an innocent directly to the right of them",
+            # Should be DirectlyRight but wrapped with a lambda to add SinglePerson
+            OnlyXPeople(4, Edges(), SimplePersonConstraint(ANY, Exact(INNOCENT, 1))),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:

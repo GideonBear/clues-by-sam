@@ -523,44 +523,84 @@ class Clue(ABC):
             ]:
                 return Known(parse_person(person, me), Verdict.parse(verdict))
 
-            case [
-                "Exactly" | "Only",
-                amount,
-                "person"
-                | "people"
-                | "persons"
-                | "innocent"
-                | "innocents"
-                | "criminal"
-                | "criminals" as a_verdict,
-                *a_region,
-                "has" | "have",
-                "an",
-                "innocent" | "criminal" as b_verdict,
-                "directly",
-                "above" | "below" as direction_s,
-                "them",
-            ] | [
-                "Exactly" | "Only",
-                amount,
-                "person"
-                | "people"
-                | "persons"
-                | "innocent"
-                | "innocents"
-                | "criminal"
-                | "criminals" as a_verdict,
-                *a_region,
-                "has" | "have",
-                "an",
-                "innocent" | "criminal" as b_verdict,
-                "directly",
-                "to",
-                "the",
-                "left" | "right" as direction_s,
-                "of",
-                "them",
-            ]:
+            case (
+                [
+                    "Exactly" | "Only",
+                    amount,
+                    "person"
+                    | "people"
+                    | "persons"
+                    | "innocent"
+                    | "innocents"
+                    | "criminal"
+                    | "criminals" as a_verdict,
+                    *a_region,
+                    "has" | "have",
+                    "an",
+                    "innocent" | "criminal" as b_verdict,
+                    "directly",
+                    "above" | "below" as direction_s,
+                    "them",
+                ]
+                | [
+                    "Exactly" | "Only",
+                    amount,
+                    "person"
+                    | "people"
+                    | "persons"
+                    | "innocent"
+                    | "innocents"
+                    | "criminal"
+                    | "criminals" as a_verdict,
+                    *a_region,
+                    "has" | "have",
+                    "an",
+                    "innocent" | "criminal" as b_verdict,
+                    "directly",
+                    "to",
+                    "the",
+                    "left" | "right" as direction_s,
+                    "of",
+                    "them",
+                ]
+                | [
+                    amount,
+                    "person"
+                    | "people"
+                    | "persons"
+                    | "innocent"
+                    | "innocents"
+                    | "criminal"
+                    | "criminals" as a_verdict,
+                    *a_region,
+                    "has" | "have",
+                    "an",
+                    "innocent" | "criminal" as b_verdict,
+                    "directly",
+                    "above" | "below" as direction_s,
+                    "them",
+                ]
+                | [
+                    amount,
+                    "person"
+                    | "people"
+                    | "persons"
+                    | "innocent"
+                    | "innocents"
+                    | "criminal"
+                    | "criminals" as a_verdict,
+                    *a_region,
+                    "has" | "have",
+                    "an",
+                    "innocent" | "criminal" as b_verdict,
+                    "directly",
+                    "to",
+                    "the",
+                    "left" | "right" as direction_s,
+                    "of",
+                    "them",
+                ]
+            ):
                 amount_p = parse_num(amount)
                 a_region_p = Region.parse_region(a_region, me)
                 b_verdict_p = Verdict.parse(b_verdict)
