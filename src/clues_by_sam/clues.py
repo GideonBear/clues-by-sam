@@ -64,20 +64,19 @@ class Region(ABC):
                 case ["in", "my", "row"]:
                     found = RowOf(me)
                 case ["above", person]:
-                    found = Above(Person(person))
+                    found = Above(parse_person(person, me))
                 case ["below", person]:
-                    found = Below(Person(person))
+                    found = Below(parse_person(person, me))
                 case ["to", "the", "left", "of", person]:
-                    found = Left(Person(person))
+                    found = Left(parse_person(person, me))
                 case ["to", "the", "right", "of", person]:
-                    found = Right(Person(person))
+                    found = Right(parse_person(person, me))
                 case ["in", "between", a, "and", b]:
-                    found = Between(Person(a), Person(b))
+                    found = Between(parse_person(a, me), parse_person(b, me))
                 case ["neighbor" | "neighbors" | "neighboring", person]:
-                    found = Neighboring(Person(person))
-                case [person, "neighbor" | "neighbors"] if person.endswith("'s"):
-                    person = person.removesuffix("'s")
-                    found = Neighboring(Person(person))
+                    found = Neighboring(parse_person(person, me))
+                case [person, "neighbor" | "neighbors"]:
+                    found = Neighboring(parse_person(person, me))
                 case _:
                     pass
 
@@ -467,6 +466,13 @@ def parse_num(s: str) -> int:
     return int(s)
 
 
+def parse_person(s: str, me: Person) -> Person:
+    if s.lower() in {"me", "my"}:
+        return me
+    s = s.removesuffix("'s")
+    return Person(s)
+
+
 def parse_directly_full(s: Sequence[str]) -> Callable[[Region], Region]:
     match s:
         case [direction]:
@@ -515,7 +521,7 @@ class Clue(ABC):
                 "a",
                 "innocent" | "criminal" as verdict,
             ]:
-                return Known(Person(person), Verdict.parse(verdict))
+                return Known(parse_person(person, me), Verdict.parse(verdict))
 
             case [
                 "Exactly" | "Only",
@@ -683,8 +689,8 @@ class Clue(ABC):
                 "innocent" | "criminal" as verdict,
                 "neighbors",
                 *spec_region_s,
-            ] if total_person.endswith("'s"):
-                total_region = Neighboring(Person(total_person.removesuffix("'s")))
+            ]:
+                total_region = Neighboring(parse_person(total_person, me))
                 spec_region = Region.parse_region(spec_region_s, me)
                 verdict_p = Verdict.parse(verdict)
                 return Combined(
@@ -781,13 +787,13 @@ class Clue(ABC):
                 amount,
                 "innocent" | "criminal" as verdict,
                 "neighbors",
-            ] if b.endswith("'s"):
-                b = b.removesuffix("'s")
+            ]:
                 verdict_p = Verdict.parse(verdict)
                 return Combined(
-                    Known(Person(a), verdict_p),
+                    Known(parse_person(a, me), verdict_p),
                     RegionClue(
-                        Neighboring(Person(b)), Exact(verdict_p, parse_num(amount))
+                        Neighboring(parse_person(b, me)),
+                        Exact(verdict_p, parse_num(amount)),
                     ),
                 )
 
@@ -802,7 +808,7 @@ class Clue(ABC):
             ]:
                 verdict_p = Verdict.parse(verdict)
                 return Combined(
-                    Known(Person(person), verdict_p),
+                    Known(parse_person(person, me), verdict_p),
                     RegionClue(
                         Region.parse_region(region, me),
                         Exact(verdict_p, parse_num(amount)),
@@ -818,7 +824,7 @@ class Clue(ABC):
                 "neighbors",
             ]:
                 return RegionClue(
-                    Neighboring(Person(person)),
+                    Neighboring(parse_person(person, me)),
                     Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
@@ -832,7 +838,7 @@ class Clue(ABC):
             ]:
                 verdict_p = Verdict.parse(verdict)
                 return Combined(
-                    Known(Person(person), verdict_p),
+                    Known(parse_person(person, me), verdict_p),
                     RegionClue(Region.parse_region(region, me), Exact(verdict_p, 1)),
                 )
 
@@ -899,7 +905,10 @@ class Clue(ABC):
             ]:
                 verdict_p = Verdict.parse(verdict)
                 return Equal(
-                    Neighboring(Person(a)), verdict_p, Neighboring(Person(b)), verdict_p
+                    Neighboring(parse_person(a, me)),
+                    verdict_p,
+                    Neighboring(parse_person(b, me)),
+                    verdict_p,
                 )
 
             case [
@@ -948,7 +957,10 @@ class Clue(ABC):
             ]:
                 verdict_p = Verdict.parse(verdict)
                 return More(
-                    Neighboring(Person(a)), verdict_p, Neighboring(Person(b)), verdict_p
+                    Neighboring(parse_person(a, me)),
+                    verdict_p,
+                    Neighboring(parse_person(b, me)),
+                    verdict_p,
                 )
 
             case [
@@ -974,7 +986,10 @@ class Clue(ABC):
                 "common",
             ]:
                 return RegionClue(
-                    Overlap(Neighboring(Person(a)), Neighboring(Person(b))),
+                    Overlap(
+                        Neighboring(parse_person(a, me)),
+                        Neighboring(parse_person(b, me)),
+                    ),
                     Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
@@ -1024,9 +1039,9 @@ class Clue(ABC):
                 "neighbors",
             ]:
                 return More(
-                    Neighboring(Person(person)),
+                    Neighboring(parse_person(person, me)),
                     Verdict.parse(a_verdict),
-                    Neighboring(Person(person)),
+                    Neighboring(parse_person(person, me)),
                     Verdict.parse(b_verdict),
                 )
 
