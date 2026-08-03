@@ -557,22 +557,34 @@ class Clue(ABC):
                     Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
-            case [
-                "An",
-                "odd" | "even" as parity,
-                "number",
-                "of",
-                "innocents" | "criminals" as verdict,
-                *region,
-            ] | [
-                "There's",
-                "an",
-                "odd" | "even" as parity,
-                "number",
-                "of",
-                "innocents" | "criminals" as verdict,
-                *region,
-            ]:
+            case (
+                [
+                    "An",
+                    "odd" | "even" as parity,
+                    "number",
+                    "of",
+                    "innocents" | "criminals" as verdict,
+                    *region,
+                ]
+                | [
+                    "There's",
+                    "an",
+                    "odd" | "even" as parity,
+                    "number",
+                    "of",
+                    "innocents" | "criminals" as verdict,
+                    *region,
+                ]
+                | [
+                    "An",
+                    "odd" | "even" as parity,
+                    "number",
+                    "of",
+                    *region,
+                    "are",
+                    "innocent" | "criminal" as verdict,
+                ]
+            ):
                 return RegionClue(
                     Region.parse_region(region), Parity.parse(verdict, parity)
                 )
