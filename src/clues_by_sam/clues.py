@@ -768,7 +768,7 @@ class Clue(ABC):
                 "have",
                 amount,
                 "innocent" | "criminal" as verdict,
-                "neighbors",
+                "neighbor" | "neighbors",
                 "in",
                 "common",
             ]:

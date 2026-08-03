@@ -239,6 +239,13 @@ from clues_by_sam.game import Person, Profession
                 More(Row(3), CRIMINAL, Row(4), CRIMINAL),
             ),
         ),
+        (
+            "Pam and Wanda have one innocent neighbor in common",
+            RegionClue(
+                Overlap(Neighboring(Person("Pam")), Neighboring(Person("Wanda"))),
+                Exact(INNOCENT, 1),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
