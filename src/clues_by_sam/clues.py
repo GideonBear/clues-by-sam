@@ -580,6 +580,29 @@ class Clue(ABC):
                 )
 
             case [
+                "Column" | "Row" as typ_1,
+                row_or_column,
+                "has",
+                "more",
+                "innocents" | "criminals" as verdict,
+                "than",
+                "any",
+                "other",
+                typ_2,
+            ] if typ_1.lower() == typ_2:
+                region_type = Row if typ_2 == "row" else Column
+                num = ROWS if typ_2 == "row" else COLUMNS
+                verdict_p = Verdict.parse(verdict)
+                row_or_column_p = region_type.parse(row_or_column)
+                return Combined(
+                    *(
+                        More(row_or_column_p, verdict_p, region_type(i), verdict_p)
+                        for i in range(num)
+                        if region_type(i) != row_or_column_p
+                    )
+                )
+
+            case [
                 a,
                 "is",
                 "one",

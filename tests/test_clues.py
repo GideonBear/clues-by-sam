@@ -230,6 +230,15 @@ from clues_by_sam.game import Person, Profession
                 CRIMINAL,
             ),
         ),
+        (
+            "Row 4 has more criminals than any other row",
+            Combined(
+                More(Row(3), CRIMINAL, Row(0), CRIMINAL),
+                More(Row(3), CRIMINAL, Row(1), CRIMINAL),
+                More(Row(3), CRIMINAL, Row(2), CRIMINAL),
+                More(Row(3), CRIMINAL, Row(4), CRIMINAL),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
