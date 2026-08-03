@@ -47,6 +47,8 @@ class Region(ABC):
         for i in range(1, len(region) + 1):
             found: Region | None = None
             match region[:i]:
+                case ["in", "total"]:
+                    found = All()
                 case ["on", "the", "edges"]:
                     found = Edges()
                 case ["in", "column", column] | ["column", column]:
@@ -94,6 +96,13 @@ class ConnectedRegion(Region, ABC):
             msg = f"Expected a connected region, got: '{" ".join(region)}'"
             raise ValueError(msg)  # ruff: ignore[type-check-without-type-error]
         return region_p
+
+
+@dataclass(frozen=True)
+class All(Region):
+    @override
+    def people(self, field: Field) -> Iterable[Person]:
+        return field.all()
 
 
 @dataclass(frozen=True, init=False)
@@ -469,19 +478,6 @@ class Clue(ABC):
                 "innocent" | "criminal" as verdict,
             ]:
                 return Known(Person(person), Verdict.parse(verdict))
-
-            case [
-                "There",
-                "is" | "are",
-                "exactly" | "only",
-                amount,
-                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
-                *region,
-            ]:
-                return RegionClue(
-                    Region.parse_region(region),
-                    Exact(Verdict.parse(verdict), parse_num(amount)),
-                )
 
             case [
                 "Exactly" | "Only",
@@ -1033,6 +1029,25 @@ class Clue(ABC):
                     Verdict.parse(a_verdict),
                     ProfessionRegion(Profession(b_profession.removesuffix("s"))),
                     Verdict.parse(b_verdict),
+                )
+
+            case [
+                "There",
+                "is" | "are",
+                amount,
+                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
+                *region,
+            ] | [
+                "There",
+                "is" | "are",
+                "exactly" | "only",
+                amount,
+                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
+                *region,
+            ]:
+                return RegionClue(
+                    Region.parse_region(region),
+                    Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
             case _:

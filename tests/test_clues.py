@@ -8,6 +8,7 @@ from clues_by_sam.clues import (
     CRIMINAL,
     INNOCENT,
     Above,
+    All,
     AtLeast,
     Below,
     Between,
@@ -278,6 +279,7 @@ from clues_by_sam.game import Person, Profession
                 SimplePersonConstraint(Neighboring, Exact(CRIMINAL, 6)),
             ),
         ),
+        ("There are 8 innocents in total", RegionClue(All(), Exact(INNOCENT, 8))),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
