@@ -119,6 +119,15 @@ class AllExcept(Region):
 
 
 @dataclass(frozen=True)
+class SinglePerson(Region):
+    person: Person
+
+    @override
+    def people(self, field: Field) -> Iterable[Person]:
+        yield self.person
+
+
+@dataclass(frozen=True)
 class ProfessionRegion(Region):
     profession: Profession
 
@@ -411,6 +420,32 @@ def parse_num(s: str) -> int:
     return int(s)
 
 
+def parse_directly_full(s: Sequence[str]) -> Callable[[Region], Region]:
+    match s:
+        case [direction]:
+            return parse_directly_partial(direction)
+        case ["to", "the", direction]:
+            return parse_directly_partial(direction)
+        case _:
+            msg = f"Unknown direction for 'directly ...': {s}"
+            raise ValueError(msg)
+
+
+def parse_directly_partial(s: str) -> Callable[[Region], Region]:
+    match s:
+        case "above":
+            return DirectlyAbove
+        case "below":
+            return DirectlyBelow
+        case "left":
+            return DirectlyLeft
+        case "right":
+            return DirectlyRight
+        case _:
+            msg = f"Unknown direction for 'directly ...': {s}"
+            raise ValueError(msg)
+
+
 class Clue(ABC):
     @abstractmethod
     def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef: ...
@@ -446,6 +481,69 @@ class Clue(ABC):
                 return RegionClue(
                     Region.parse_region(region),
                     Exact(Verdict.parse(verdict), parse_num(amount)),
+                )
+
+            case [
+                "Exactly" | "Only",
+                amount,
+                "person"
+                | "people"
+                | "innocent"
+                | "innocents"
+                | "criminal"
+                | "criminals" as a_verdict,
+                *a_region,
+                "has" | "have",
+                "an",
+                "innocent" | "criminal" as b_verdict,
+                "directly",
+                "above" | "below" as direction_s,
+                "them",
+            ] | [
+                "Exactly" | "Only",
+                amount,
+                "person"
+                | "people"
+                | "innocent"
+                | "innocents"
+                | "criminal"
+                | "criminals" as a_verdict,
+                *a_region,
+                "has" | "have",
+                "an",
+                "innocent" | "criminal" as b_verdict,
+                "directly",
+                "to",
+                "the",
+                "left" | "right" as direction_s,
+                "of",
+                "them",
+            ]:
+                amount_p = parse_num(amount)
+                a_region_p = Region.parse_region(a_region)
+                b_verdict_p = Verdict.parse(b_verdict)
+
+                if a_verdict in {"person", "people"}:
+                    return OnlyXPeople(
+                        amount_p,
+                        a_region_p,
+                        SimplePersonConstraint(
+                            lambda p: parse_directly_partial(direction_s)(
+                                SinglePerson(p)
+                            ),
+                            Exact(b_verdict_p, 1),
+                        ),
+                    )
+
+                a_verdict_p = Verdict.parse(a_verdict)
+                return OnlyXPeople(
+                    amount_p,
+                    a_region_p,
+                    ConditionalPersonConstraint(
+                        lambda p: parse_directly_partial(direction_s)(SinglePerson(p)),
+                        Exact(b_verdict_p, 1),
+                        a_verdict_p,
+                    ),
                 )
 
             case [
@@ -680,19 +778,21 @@ class Clue(ABC):
 
             case [
                 "Exactly" | "Only",
-                "one",
-                "person",
+                a_amount,
+                "person" | "people",
                 *region,
-                "has",
+                "has" | "have",
                 "exactly" | "only",
-                amount,
+                b_amount,
                 "innocent" | "criminal" as verdict,
                 "neighbors",
             ]:
-                return OnlyOnePerson(
+                return OnlyXPeople(
+                    parse_num(a_amount),
                     Region.parse_region(region),
-                    Neighboring,
-                    Exact(Verdict.parse(verdict), parse_num(amount)),
+                    SimplePersonConstraint(
+                        Neighboring, Exact(Verdict.parse(verdict), parse_num(b_amount))
+                    ),
                 )
 
             case [
@@ -877,22 +977,8 @@ class Clue(ABC):
                     "us",
                 ]
             ):
-                direction_type: Callable[[Region], Region]
-                match direction:
-                    case ["above"]:
-                        direction_type = DirectlyAbove
-                    case ["below"]:
-                        direction_type = DirectlyBelow
-                    case ["to", "the", "left"]:
-                        direction_type = DirectlyLeft
-                    case ["to", "the", "right"]:
-                        direction_type = DirectlyRight
-                    case _:
-                        msg = f"Unknown direction for 'directly ...': {direction}"
-                        raise ValueError(msg)
-
                 return RegionClue(
-                    direction_type(
+                    parse_directly_full(direction)(
                         ProfessionRegion(Profession(profession.removesuffix("s")))
                     ),
                     Exact(Verdict.parse(verdict), parse_num(amount)),
@@ -963,23 +1049,56 @@ class ConnectedRegionClue(Clue):
 
 
 @dataclass(frozen=True)
-class OnlyOnePerson(Clue):
+class OnlyXPeople(Clue):
+    x: int
     region: Region
-    personal_region: Callable[[Person], Region]
-    constraint: Constraint
+    constraint: PersonConstraint
 
     def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
         return PbEq(
             [
                 (
-                    RegionClue(self.personal_region(person), self.constraint).z3(
-                        field, people
-                    ),
+                    self.constraint.z3(field, people, person),
                     1,
                 )
                 for person in self.region.people(field)
             ],
-            1,
+            self.x,
+        )
+
+
+class PersonConstraint(ABC):
+    @abstractmethod
+    def z3(
+        self, field: Field, people: Mapping[Person, BoolRef], person: Person
+    ) -> BoolRef: ...
+
+
+@dataclass(frozen=True)
+class SimplePersonConstraint(PersonConstraint):
+    personal_region: Callable[[Person], Region]
+    constraint: Constraint
+
+    def z3(
+        self, field: Field, people: Mapping[Person, BoolRef], person: Person
+    ) -> BoolRef:
+        return RegionClue(self.personal_region(person), self.constraint).z3(
+            field, people
+        )
+
+
+@dataclass(frozen=True)
+class ConditionalPersonConstraint(PersonConstraint):
+    personal_region: Callable[[Person], Region]
+    constraint: Constraint
+    condition: Verdict
+
+    def z3(
+        self, field: Field, people: Mapping[Person, BoolRef], person: Person
+    ) -> BoolRef:
+        return And(
+            people[person] == self.condition.value,
+            RegionClue(self.personal_region(person), self.constraint).z3(field, people),
         )
 
 

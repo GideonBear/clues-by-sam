@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from unittest.mock import ANY
+
 import pytest
 
 from clues_by_sam.clues import (
@@ -12,6 +14,7 @@ from clues_by_sam.clues import (
     Clue,
     Column,
     Combined,
+    ConditionalPersonConstraint,
     Connected,
     ConnectedRegionClue,
     DirectlyBelow,
@@ -24,13 +27,14 @@ from clues_by_sam.clues import (
     Neighboring,
     Not,
     OnlyOne,
-    OnlyOnePerson,
+    OnlyXPeople,
     Overlap,
     Parity,
     ProfessionRegion,
     RegionClue,
     Right,
     Row,
+    SimplePersonConstraint,
 )
 from clues_by_sam.game import Person, Profession
 
@@ -96,7 +100,9 @@ from clues_by_sam.game import Person, Profession
         ),
         (
             "Only one person in row 3 has exactly 3 criminal neighbors",
-            OnlyOnePerson(Row(2), Neighboring, Exact(CRIMINAL, 3)),
+            OnlyXPeople(
+                1, Row(2), SimplePersonConstraint(Neighboring, Exact(CRIMINAL, 3))
+            ),
         ),
         (
             "Column B is the only column with exactly 2 innocents",
@@ -253,6 +259,15 @@ from clues_by_sam.game import Person, Profession
                 CRIMINAL,
                 Neighboring(Person("Wanda")),
                 INNOCENT,
+            ),
+        ),
+        (
+            "Only 1 criminal in column C has an innocent directly to the left of them",
+            OnlyXPeople(
+                1,
+                Column(2),
+                # Should be DirectlyLeft but wrapped with a lambda to add SinglePerson
+                ConditionalPersonConstraint(ANY, Exact(INNOCENT, 1), CRIMINAL),
             ),
         ),
     ],
