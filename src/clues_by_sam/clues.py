@@ -919,6 +919,17 @@ class Clue(ABC):
                 "neighbor" | "neighbors",
                 "in",
                 "common",
+            ] | [
+                a,
+                "and",
+                b,
+                "have",
+                "exactly" | "only",
+                amount,
+                "innocent" | "criminal" as verdict,
+                "neighbor" | "neighbors",
+                "in",
+                "common",
             ]:
                 return RegionClue(
                     Overlap(Neighboring(Person(a)), Neighboring(Person(b))),
