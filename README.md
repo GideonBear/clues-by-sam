@@ -4,11 +4,11 @@
 
 ```bash
 # Using uv (will automatically install Python if necessary):
-uv tool install clues-by-sam
+uv tool install git+https://github.com/GideonBear/clues-by-sam
 # Using pipx:
-pipx install clues-by-sam
+pipx install git+https://github.com/GideonBear/clues-by-sam
 # Using pip:
-pip install clues-by-sam
+pip install git+https://github.com/GideonBear/clues-by-sam
 ```
 
 ## Python version support
