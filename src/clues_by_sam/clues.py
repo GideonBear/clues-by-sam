@@ -1101,6 +1101,26 @@ class Clue(ABC):
                     Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
+            case [
+                "No",
+                "one",
+                *region,
+                "has",
+                "more",
+                "than",
+                amount,
+                "innocent" | "criminal" as verdict,
+                "neighbor" | "neighbors",
+            ]:
+                return OnlyXPeople(
+                    0,
+                    Region.parse_region(region, me),
+                    SimplePersonConstraint(
+                        Neighboring,
+                        AtLeast(Verdict.parse(verdict), parse_num(amount) + 1),
+                    ),
+                )
+
             case _:
                 msg = f"Unknown clue: '{clue_s}'"
                 raise ValueError(msg)

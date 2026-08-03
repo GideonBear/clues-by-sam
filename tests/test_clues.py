@@ -288,6 +288,12 @@ from clues_by_sam.game import Person, Profession
                 RegionClue(ColumnOf(Person("Me")), Exact(CRIMINAL, 2)),
             ),
         ),
+        (
+            "No one in row 5 has more than 2 innocent neighbors",
+            OnlyXPeople(
+                0, Row(4), SimplePersonConstraint(Neighboring, AtLeast(INNOCENT, 3))
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
