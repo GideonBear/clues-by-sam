@@ -522,6 +522,7 @@ class Clue(ABC):
                 amount,
                 "person"
                 | "people"
+                | "persons"
                 | "innocent"
                 | "innocents"
                 | "criminal"
@@ -538,6 +539,7 @@ class Clue(ABC):
                 amount,
                 "person"
                 | "people"
+                | "persons"
                 | "innocent"
                 | "innocents"
                 | "criminal"
@@ -557,7 +559,7 @@ class Clue(ABC):
                 a_region_p = Region.parse_region(a_region, me)
                 b_verdict_p = Verdict.parse(b_verdict)
 
-                if a_verdict in {"person", "people"}:
+                if a_verdict in {"person", "people", "persons"}:
                     return OnlyXPeople(
                         amount_p,
                         a_region_p,
@@ -867,7 +869,7 @@ class Clue(ABC):
             case [
                 "Exactly" | "Only",
                 a_amount,
-                "person" | "people",
+                "person" | "people" | "persons",
                 *region,
                 "has" | "have",
                 "exactly" | "only",
