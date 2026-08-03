@@ -53,7 +53,7 @@ class Region(ABC):
                     found = All()
                 case ["on", "the", "edges"]:
                     found = Edges()
-                case ["in", "the", "corners"]:
+                case ["in", "a" | "the", "corner" | "corners"]:
                     found = Corners()
                 case ["in", "column", column] | ["column", column]:
                     found = Column.parse(column)
