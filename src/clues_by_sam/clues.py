@@ -1182,6 +1182,33 @@ class Clue(ABC):
             case [
                 "There",
                 "is" | "are",
+                *constraint,
+                amount,
+                "innocent" | "criminal" | "innocents" | "criminals" as verdict,
+                "among",
+                "all",
+                "professions",
+            ]:
+                constraint_type: Callable[[Verdict, int], Constraint]
+                match constraint:
+                    case ["at", "least"]:
+                        constraint_type = AtLeast
+                    case ["exactly" | "only"]:
+                        constraint_type = Exact
+                    case _:
+                        msg = (
+                            f"Invalid constraint type: '{constraint}' "
+                            f"in clue: '{clue_s}'"
+                        )
+                        raise ValueError(msg)
+
+                return ForEveryProfession(
+                    constraint_type(Verdict.parse(verdict), parse_num(amount))
+                )
+
+            case [
+                "There",
+                "is" | "are",
                 amount,
                 "innocent" | "innocents" | "criminal" | "criminals" as verdict,
                 *region,
@@ -1350,4 +1377,15 @@ class More(Clue):
     def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
         return count(self.a.people(field), people, self.a_verdict) > count(
             self.b.people(field), people, self.b_verdict
+        )
+
+
+@dataclass(frozen=True)
+class ForEveryProfession(Clue):
+    constraint: Constraint
+
+    def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
+        return And(
+            RegionClue(ProfessionRegion(profession), self.constraint).z3(field, people)
+            for profession in set(field.professions.values())
         )
