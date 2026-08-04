@@ -44,7 +44,7 @@ class Region(ABC):
 
     @classmethod
     def parse_region(cls, region: Sequence[str], me: Person) -> Region:  # ruff: ignore[complex-structure, too-many-branches]
-        if region[0] in {"is", "are", "also"}:
+        if region[0] in {"is", "are", "also", "who"}:
             region = region[1:]
         for i in range(1, len(region) + 1):
             found: Region | None = None
