@@ -1186,8 +1186,16 @@ class Clue(ABC):
                 amount,
                 "innocent" | "criminal" | "innocents" | "criminals" as verdict,
                 "among",
-                "all",
-                "professions",
+                "all" | "each",
+                "profession" | "professions",
+            ] | [
+                "There's",
+                *constraint,
+                amount,
+                "innocent" | "criminal" | "innocents" | "criminals" as verdict,
+                "among",
+                "all" | "each",
+                "profession" | "professions",
             ]:
                 constraint_type: Callable[[Verdict, int], Constraint]
                 match constraint:
