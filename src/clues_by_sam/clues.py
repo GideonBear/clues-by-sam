@@ -477,7 +477,7 @@ def parse_directly_full(s: Sequence[str]) -> Callable[[Region], Region]:
     match s:
         case [direction]:
             return parse_directly_partial(direction)
-        case ["to", "the", direction]:
+        case ["to", "the", direction] | ["to", "the", direction, "of"]:
             return parse_directly_partial(direction)
         case _:
             msg = f"Unknown direction for 'directly ...': {s}"
