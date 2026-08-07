@@ -1005,6 +1005,60 @@ class Clue(ABC):
                 )
 
             case [
+                "There's",
+                "an",
+                "equal",
+                "number",
+                "of",
+                "innocent" | "criminal",
+                "and",
+                "criminal" | "innocent",
+                profession,
+            ] | [
+                "There",
+                "is" | "are",
+                "an",
+                "equal",
+                "number",
+                "of",
+                "innocent" | "criminal",
+                "and",
+                "criminal" | "innocent",
+                profession,
+            ]:
+                return Equal(
+                    ProfessionRegion(Profession(profession.removesuffix("s"))),
+                    INNOCENT,
+                    ProfessionRegion(Profession(profession.removesuffix("s"))),
+                    CRIMINAL,
+                )
+
+            case [
+                "There's",
+                "an",
+                "equal",
+                "number",
+                "of",
+                "innocent" | "innocents" | "criminal" | "criminals",
+                "and",
+                "criminal" | "criminals" | "innocent" | "innocents",
+                *region,
+            ] | [
+                "There",
+                "is" | "are",
+                "an",
+                "equal",
+                "number",
+                "of",
+                "innocent" | "innocents" | "criminal" | "criminals",
+                "and",
+                "criminal" | "criminals" | "innocent" | "innocents",
+                *region,
+            ]:
+                region_p = Region.parse_region(region, me)
+                return Equal(region_p, INNOCENT, region_p, CRIMINAL)
+
+            case [
                 "There",
                 "are",
                 "more",

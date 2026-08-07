@@ -321,6 +321,20 @@ from clues_by_sam.game import Person, Profession
                 RegionClue(Row(1), AtLeast(INNOCENT, 2)),
             ),
         ),
+        (
+            "There's an equal number of innocent and criminal cops",
+            Equal(
+                ProfessionRegion(Profession("cop")),
+                INNOCENT,
+                ProfessionRegion(Profession("cop")),
+                CRIMINAL,
+            ),
+        ),
+        # Unencountered
+        (
+            "There is an equal number of criminals and innocents in row 2",
+            Equal(Row(1), INNOCENT, Row(1), CRIMINAL),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
