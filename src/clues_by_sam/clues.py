@@ -458,11 +458,25 @@ class Not(Constraint):
         return z3.Not(self.constraint.z3(people, people_m))
 
 
+nums = {
+    "no": 0,
+    "zero": 0,
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+}
+
+
 def parse_num(s: str) -> int:
-    if s == "no":
-        return 0
-    if s == "one":
-        return 1
+    if s in nums:
+        return nums[s]
     return int(s)
 
 
@@ -852,6 +866,26 @@ class Clue(ABC):
                     RegionClue(
                         Region.parse_region(region, me),
                         Exact(verdict_p, parse_num(amount)),
+                    ),
+                )
+
+            case [
+                person,
+                "is",
+                "one",
+                "of",
+                amount,
+                "or",
+                "more",
+                "innocents" | "criminals" as verdict,
+                *region,
+            ]:
+                verdict_p = Verdict.parse(verdict)
+                return Combined(
+                    Known(parse_person(person, me), verdict_p),
+                    RegionClue(
+                        Region.parse_region(region, me),
+                        AtLeast(verdict_p, parse_num(amount)),
                     ),
                 )
 

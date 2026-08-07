@@ -314,6 +314,13 @@ from clues_by_sam.game import Person, Profession
             "There is at least one criminal among all professions",
             ForEveryProfession(AtLeast(CRIMINAL, 1)),
         ),
+        (
+            "Gary is one of two or more innocents in row 2",
+            Combined(
+                Known(Person("Gary"), INNOCENT),
+                RegionClue(Row(1), AtLeast(INNOCENT, 2)),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
