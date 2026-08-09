@@ -1220,6 +1220,19 @@ class Clue(ABC):
                     *direction,
                     "us",
                 ]
+                | [
+                    amount,
+                    "of",
+                    "the",
+                    str(),
+                    profession,
+                    "has" | "have",
+                    "a" | "an",
+                    "innocent" | "criminal" as verdict,
+                    "directly",
+                    *direction,
+                    "them",
+                ]
             ):
                 return RegionClue(
                     parse_directly_full(direction)(
