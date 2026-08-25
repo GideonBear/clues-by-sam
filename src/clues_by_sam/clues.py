@@ -1096,6 +1096,23 @@ class Clue(ABC):
                 "There",
                 "are",
                 "more",
+                "innocent" | "innocents" | "criminal" | "criminals" as verdict_1,
+                "than",
+                "criminal" | "criminals" | "innocent" | "innocents" as verdict_2,
+                *region,
+            ]:
+                region_p = Region.parse_region(region, me)
+                return More(
+                    region_p,
+                    Verdict.parse(verdict_1),
+                    region_p,
+                    Verdict.parse(verdict_2),
+                )
+
+            case [
+                "There",
+                "are",
+                "more",
                 "innocents" | "criminals" as verdict,
                 *region_than_region,
             ] if "than" in region_than_region:

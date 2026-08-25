@@ -340,6 +340,10 @@ from clues_by_sam.game import Person, Profession
             "2 criminals in my row are on the edges",
             RegionClue(Overlap(RowOf(Person("Me")), Edges()), Exact(CRIMINAL, 2)),
         ),
+        (
+            "There are more criminals than innocents above Ryan",
+            More(Above(Person("Ryan")), CRIMINAL, Above(Person("Ryan")), INNOCENT),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
