@@ -38,6 +38,32 @@ INNOCENT = Verdict.INNOCENT
 CRIMINAL = Verdict.CRIMINAL
 
 
+PROFESSIONS = {
+    "coder",
+    "painter",
+    "pilot",
+    "builder",
+    "mech",
+    "clerk",
+    "cop",
+    "judge",
+    "sleuth",
+    "singer",
+    "teacher",
+    "guard",
+    "farmer",
+    "cook",
+    "doctor",
+}
+
+
+def parse_profession(s: str) -> Profession | None:
+    s = s.removesuffix("s")
+    if s in PROFESSIONS:
+        return Profession(s)
+    return None
+
+
 class Region(ABC):
     @abstractmethod
     def people(self, field: Field) -> Iterable[Person]: ...
@@ -77,6 +103,10 @@ class Region(ABC):
                     found = Neighboring(parse_person(person, me))
                 case [person, "neighbor" | "neighbors"]:
                     found = Neighboring(parse_person(person, me))
+                case [profession] | ["us", str(), profession] if (
+                    profession_p := parse_profession(profession)
+                ) is not None:
+                    found = ProfessionRegion(profession_p)
                 case _:
                     pass
 
@@ -1044,35 +1074,6 @@ class Clue(ABC):
                 "equal",
                 "number",
                 "of",
-                "innocent" | "criminal",
-                "and",
-                "criminal" | "innocent",
-                profession,
-            ] | [
-                "There",
-                "is" | "are",
-                "an",
-                "equal",
-                "number",
-                "of",
-                "innocent" | "criminal",
-                "and",
-                "criminal" | "innocent",
-                profession,
-            ]:
-                return Equal(
-                    ProfessionRegion(Profession(profession.removesuffix("s"))),
-                    INNOCENT,
-                    ProfessionRegion(Profession(profession.removesuffix("s"))),
-                    CRIMINAL,
-                )
-
-            case [
-                "There's",
-                "an",
-                "equal",
-                "number",
-                "of",
                 "innocent" | "innocents" | "criminal" | "criminals",
                 "and",
                 "criminal" | "criminals" | "innocent" | "innocents",
@@ -1298,11 +1299,9 @@ class Clue(ABC):
                     *direction,
                     "them",
                 ]
-            ):
+            ) if (profession_p := parse_profession(profession)) is not None:
                 return RegionClue(
-                    parse_directly_full(direction)(
-                        ProfessionRegion(Profession(profession.removesuffix("s")))
-                    ),
+                    parse_directly_full(direction)(ProfessionRegion(profession_p)),
                     Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
@@ -1343,10 +1342,10 @@ class Clue(ABC):
                     "innocent" | "criminal" as b_verdict,
                     "neighbor" | "neighbors",
                 ]
-            ):
+            ) if (a_profession_p := parse_profession(a_profession)) is not None:
                 return OnlyXPeople(
                     parse_num(a_amount),
-                    ProfessionRegion(Profession(a_profession.removesuffix("s"))),
+                    ProfessionRegion(a_profession_p),
                     SimplePersonConstraint(
                         Neighboring,
                         Exact(Verdict.parse(b_verdict), parse_num(b_amount)),
@@ -1365,11 +1364,13 @@ class Clue(ABC):
                 "are",
                 "innocent" | "criminal" as b_verdict,
                 b_profession,
-            ]:
+            ] if (a_profession_p := parse_profession(a_profession)) is not None and (
+                b_profession_p := parse_profession(b_profession)
+            ) is not None:
                 return Equal(
-                    ProfessionRegion(Profession(a_profession.removesuffix("s"))),
+                    ProfessionRegion(a_profession_p),
                     Verdict.parse(a_verdict),
-                    ProfessionRegion(Profession(b_profession.removesuffix("s"))),
+                    ProfessionRegion(b_profession_p),
                     Verdict.parse(b_verdict),
                 )
 
