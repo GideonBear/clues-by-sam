@@ -37,6 +37,7 @@ from clues_by_sam.clues import (
     RegionClue,
     Right,
     Row,
+    RowOf,
     SimplePersonConstraint,
 )
 from clues_by_sam.game import Person, Profession
@@ -334,6 +335,10 @@ from clues_by_sam.game import Person, Profession
         (
             "There is an equal number of criminals and innocents in row 2",
             Equal(Row(1), INNOCENT, Row(1), CRIMINAL),
+        ),
+        (
+            "2 criminals in my row are on the edges",
+            RegionClue(Overlap(RowOf(Person("Me")), Edges()), Exact(CRIMINAL, 2)),
         ),
     ],
 )

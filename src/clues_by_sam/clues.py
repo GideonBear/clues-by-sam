@@ -642,17 +642,6 @@ class Clue(ABC):
                     ),
                 )
 
-            case [
-                "Exactly" | "Only",
-                amount,
-                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
-                *region,
-            ]:
-                return RegionClue(
-                    Region.parse_region(region, me),
-                    Exact(Verdict.parse(verdict), parse_num(amount)),
-                )
-
             case (
                 [
                     "An",
@@ -736,6 +725,14 @@ class Clue(ABC):
 
             case [
                 "Exactly" | "Only",
+                spec_amount,
+                "of",
+                total_person,
+                total_amount,
+                "innocent" | "criminal" as verdict,
+                "neighbors",
+                *spec_region_s,
+            ] | [
                 spec_amount,
                 "of",
                 total_person,
@@ -896,6 +893,12 @@ class Clue(ABC):
                 amount,
                 "innocent" | "criminal" as verdict,
                 "neighbors",
+            ] | [
+                person,
+                "has",
+                amount,
+                "innocent" | "criminal" as verdict,
+                "neighbors",
             ]:
                 return RegionClue(
                     Neighboring(parse_person(person, me)),
@@ -946,17 +949,48 @@ class Clue(ABC):
                     ),
                 )
 
-            case [
-                "Exactly" | "Only",
-                a_amount,
-                "person" | "people" | "persons",
-                *region,
-                "has" | "have",
-                "exactly" | "only",
-                b_amount,
-                "innocent" | "criminal" as verdict,
-                "neighbors",
-            ]:
+            case (
+                [
+                    "Exactly" | "Only",
+                    a_amount,
+                    "person" | "people" | "persons",
+                    *region,
+                    "has" | "have",
+                    "exactly" | "only",
+                    b_amount,
+                    "innocent" | "criminal" as verdict,
+                    "neighbors",
+                ]
+                | [
+                    a_amount,
+                    "person" | "people" | "persons",
+                    *region,
+                    "has" | "have",
+                    "exactly" | "only",
+                    b_amount,
+                    "innocent" | "criminal" as verdict,
+                    "neighbors",
+                ]
+                | [
+                    "Exactly" | "Only",
+                    a_amount,
+                    "person" | "people" | "persons",
+                    *region,
+                    "has" | "have",
+                    b_amount,
+                    "innocent" | "criminal" as verdict,
+                    "neighbors",
+                ]
+                | [
+                    a_amount,
+                    "person" | "people" | "persons",
+                    *region,
+                    "has" | "have",
+                    b_amount,
+                    "innocent" | "criminal" as verdict,
+                    "neighbors",
+                ]
+            ):
                 return OnlyXPeople(
                     parse_num(a_amount),
                     Region.parse_region(region, me),
@@ -1241,16 +1275,44 @@ class Clue(ABC):
                     Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
-            case [
-                "Exactly" | "Only",
-                a_amount,
-                a_profession,
-                "has",
-                "exactly" | "only",
-                b_amount,
-                "innocent" | "criminal" as b_verdict,
-                "neighbor" | "neighbors",
-            ]:
+            case (
+                [
+                    "Exactly" | "Only",
+                    a_amount,
+                    a_profession,
+                    "has",
+                    "exactly" | "only",
+                    b_amount,
+                    "innocent" | "criminal" as b_verdict,
+                    "neighbor" | "neighbors",
+                ]
+                | [
+                    a_amount,
+                    a_profession,
+                    "has",
+                    "exactly" | "only",
+                    b_amount,
+                    "innocent" | "criminal" as b_verdict,
+                    "neighbor" | "neighbors",
+                ]
+                | [
+                    "Exactly" | "Only",
+                    a_amount,
+                    a_profession,
+                    "has",
+                    b_amount,
+                    "innocent" | "criminal" as b_verdict,
+                    "neighbor" | "neighbors",
+                ]
+                | [
+                    a_amount,
+                    a_profession,
+                    "has",
+                    b_amount,
+                    "innocent" | "criminal" as b_verdict,
+                    "neighbor" | "neighbors",
+                ]
+            ):
                 return OnlyXPeople(
                     parse_num(a_amount),
                     ProfessionRegion(Profession(a_profession.removesuffix("s"))),
@@ -1352,6 +1414,21 @@ class Clue(ABC):
                         Neighboring,
                         AtLeast(Verdict.parse(verdict), parse_num(amount) + 1),
                     ),
+                )
+
+            case [
+                "Exactly" | "Only",
+                amount,
+                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
+                *region,
+            ] | [
+                amount,
+                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
+                *region,
+            ]:
+                return RegionClue(
+                    Region.parse_region(region, me),
+                    Exact(Verdict.parse(verdict), parse_num(amount)),
                 )
 
             case _:
