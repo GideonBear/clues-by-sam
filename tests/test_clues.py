@@ -344,6 +344,15 @@ from clues_by_sam.game import Person, Profession
             "There are more criminals than innocents above Ryan",
             More(Above(Person("Ryan")), CRIMINAL, Above(Person("Ryan")), INNOCENT),
         ),
+        (
+            "1 of the 2 coders neighboring Xola is innocent",
+            RegionClue(
+                Overlap(
+                    ProfessionRegion(Profession("coder")), Neighboring(Person("Xola"))
+                ),
+                Exact(INNOCENT, 1),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:

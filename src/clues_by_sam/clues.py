@@ -785,6 +785,61 @@ class Clue(ABC):
                     ),
                 )
 
+            case (
+                [
+                    "Exactly" | "Only",
+                    spec_amount,
+                    "of",
+                    "the",
+                    str(),
+                    profession,
+                    *region,
+                    "is",
+                    "innocent" | "criminal" as verdict,
+                ]
+                | [
+                    spec_amount,
+                    "of",
+                    "the",
+                    str(),
+                    profession,
+                    *region,
+                    "is",
+                    "innocent" | "criminal" as verdict,
+                ]
+                | [
+                    "Exactly" | "Only",
+                    spec_amount,
+                    "of",
+                    "the",
+                    str(),
+                    profession,
+                    *region,
+                    "is",
+                    "a" | "an",
+                    "innocent" | "criminal" as verdict,
+                ]
+                | (
+                    [
+                        spec_amount,
+                        "of",
+                        "the",
+                        str(),
+                        profession,
+                        *region,
+                        "is",
+                        "a" | "an",
+                        "innocent" | "criminal" as verdict,
+                    ]
+                )
+            ) if (profession_p := parse_profession(profession)) is not None:
+                return RegionClue(
+                    Overlap(
+                        ProfessionRegion(profession_p), Region.parse_region(region, me)
+                    ),
+                    Exact(Verdict.parse(verdict), int(spec_amount)),
+                )
+
             case [
                 "Exactly" | "Only",
                 "one",
