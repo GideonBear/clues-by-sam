@@ -23,6 +23,7 @@ from clues_by_sam.clues import (
     Edges,
     Equal,
     Exact,
+    ForEvery,
     ForEveryProfession,
     Known,
     Left,
@@ -352,6 +353,10 @@ from clues_by_sam.game import Person, Profession
                 ),
                 Exact(INNOCENT, 1),
             ),
+        ),
+        (
+            "Everyone has at least 2 criminal neighbors",
+            ForEvery(All(), SimplePersonConstraint(Neighboring, AtLeast(CRIMINAL, 2))),
         ),
     ],
 )

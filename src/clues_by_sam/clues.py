@@ -1251,6 +1251,22 @@ class Clue(ABC):
                 )
 
             case [
+                "Everyone",
+                "has",
+                "at",
+                "least",
+                amount,
+                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
+                "neighbor" | "neighbors",
+            ]:
+                return ForEvery(
+                    All(),
+                    SimplePersonConstraint(
+                        Neighboring, AtLeast(Verdict.parse(verdict), parse_num(amount))
+                    ),
+                )
+
+            case [
                 "Both",
                 "innocents" | "criminals" as verdict,
                 *region,
@@ -1578,6 +1594,18 @@ class OnlyXPeople(Clue):
                 for person in self.region.people(field)
             ],
             self.x,
+        )
+
+
+@dataclass(frozen=True)
+class ForEvery(Clue):
+    region: Region
+    constraint: PersonConstraint
+
+    def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
+        return And(
+            self.constraint.z3(field, people, person)
+            for person in self.region.people(field)
         )
 
 
