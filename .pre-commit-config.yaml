@@ -104,7 +104,7 @@ repos:
   # Python
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.3
+    rev: v0.16.4
     hooks:
       - id: ruff-check
         args: [--fix]
@@ -130,7 +130,7 @@ repos:
           - playwright==1.62.0
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.28.0
+    rev: v2.28.1
     hooks:
       - id: pyproject-fmt
 
