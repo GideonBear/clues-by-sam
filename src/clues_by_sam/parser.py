@@ -103,6 +103,16 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
         amount, verdict, region_a, region_b = c
         return RegionClue(Overlap(region_a, region_b), Count(verdict, amount))
 
+    def both_region_region(self, c: tuple[Verdict, Region, Region]) -> Clue:
+        verdict, region_a, region_b = c
+        return Combined(
+            RegionClue(region_a, Count(verdict, Exact(2))),
+            RegionClue(
+                Overlap(region_a, region_b),
+                Count(verdict, Exact(2)),
+            ),
+        )
+
     def parity(self, c: tuple[Parity, Verdict, Region]) -> Clue:
         parity, verdict, region = c
         return RegionClue(region, Count(verdict, parity))

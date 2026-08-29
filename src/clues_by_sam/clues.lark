@@ -3,6 +3,8 @@ start: clue
 clue: person "is" VERDICT                                                                                           -> known
     | _there_is amount VERDICT "s"? region                                                                          -> region_exact
     | _there_is amount VERDICT profession_p_region                                                                  -> region_exact
+    // "both" implies there are no others, so this needs to be handled separately
+    | "both" VERDICT "s"? region region_2                                                                           -> both_region_region
     | amount VERDICT "s"? region region_2                                                                           -> region_exact_2
     | amount VERDICT profession_p_region region_2                                                                   -> region_exact_2
     | _there_is _a PARITY "number of" VERDICT "s" region                                                            -> parity
@@ -57,7 +59,7 @@ region: "in total"                        -> all
       | "to the right of" person          -> right
       | "in between" person "and" person  -> between
       | "neighboring" person              -> neighboring
-      | person "'s neighbors"              -> neighboring
+      | person "'s neighbors"             -> neighboring
 
 region_2: "are" region
         | "neighbor" person         -> neighboring

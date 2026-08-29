@@ -392,6 +392,16 @@ from clues_by_sam.parser import parse_clue
                 CRIMINAL,
             ),
         ),
+        (
+            "Both innocents neighboring Paula are Rose's neighbors",
+            Combined(
+                RegionClue(Neighboring(Person("Paula")), Count(INNOCENT, Exact(2))),
+                RegionClue(
+                    Overlap(Neighboring(Person("Paula")), Neighboring(Person("Rose"))),
+                    Count(INNOCENT, Exact(2)),
+                ),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
