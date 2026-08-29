@@ -1,5 +1,10 @@
 # clues-by-sam
 
+Solver for [Clues By Sam](https://cluesbysam.com/)
+* Reads grid and clicks tiles using Playwright
+* Parses clues using a [lark](https://github.com/lark-parser/lark) parser
+* Converts the clues into Z3 expressions and uses Z3 to generate valid moves
+
 ## Installation
 
 ```bash
