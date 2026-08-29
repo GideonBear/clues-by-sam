@@ -64,7 +64,7 @@ region: "in total"                        -> all
       | "to the right of" person          -> right
       | "in between" person "and" person  -> between
       | "neighboring" person              -> neighboring
-      | person "'s neighbors"             -> neighboring
+      | person "'s neighbor" "s"?         -> neighboring
 
 region_2: ("are" | "is") region
         | "neighbor" person         -> neighboring
