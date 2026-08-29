@@ -3,9 +3,9 @@ from __future__ import annotations
 import re
 from pathlib import Path
 from string import ascii_uppercase
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
-from lark import Lark, Transformer
+from lark import Discard, Lark, Transformer
 
 from clues_by_sam.clues import (
     CRIMINAL,
@@ -57,6 +57,10 @@ from clues_by_sam.clues import (
     Verdict,
 )
 from clues_by_sam.game import COLUMNS, ROWS, Person, Profession
+
+
+if TYPE_CHECKING:
+    from lark.visitors import _DiscardType
 
 
 grammar = Path(__file__).parent / "clues.lark"
@@ -116,6 +120,10 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
     def parity(self, c: tuple[Parity, Verdict, Region]) -> Clue:
         parity, verdict, region = c
         return RegionClue(region, Count(verdict, parity))
+
+    def parity_rev(self, c: tuple[Parity, Region, Verdict]) -> Clue:
+        parity, region, verdict = c
+        return self.parity((parity, verdict, region))
 
     def parity_2(self, c: tuple[Parity, Verdict, Region, Region]) -> Clue:
         parity, verdict, region, region_2 = c
@@ -607,6 +615,9 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
 
     def COLUMN(self, column: str) -> int:
         return ascii_uppercase.index(column)
+
+    def int_discard(self, _c: tuple[int]) -> _DiscardType:
+        return Discard
 
 
 # ruff: enable[no-self-use, invalid-function-name]

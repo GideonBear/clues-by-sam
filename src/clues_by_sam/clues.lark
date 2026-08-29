@@ -9,6 +9,7 @@ clue: person "is" VERDICT                                                       
     | amount VERDICT profession_p_region region_2                                                                   -> region_exact_2
     | _there_is _a PARITY "number of" VERDICT "s" region                                                            -> parity
     | _there_is _a PARITY "number of" VERDICT profession_p_region                                                   -> parity
+    | _a PARITY "number of" profession_p_region ("is" | "are") VERDICT                                              -> parity_rev
     | _a PARITY "number of" VERDICT "s" region region_2                                                             -> parity_2
     | _a PARITY "number of" VERDICT profession_p_region region_2                                                    -> parity_2
     | amount ROW_COL_TYPE "has" constraint                                                                          -> x_regions_have_constraint
@@ -122,7 +123,7 @@ person_is: person "is"
 profession_p_region: profession_p
 
 profession_p: PROFESSION "s"
-            | "us" PROFESSION "s"
+            | "us" int_discard? PROFESSION "s"
 
 PROFESSION: "coder"
           | "painter"
@@ -164,6 +165,8 @@ VERDICT: "innocent"
 COLUMN: /[A-Z]/
 
 ROW: INT
+
+int_discard: INT
 
 %import common.INT -> INT
 %import common.WS
