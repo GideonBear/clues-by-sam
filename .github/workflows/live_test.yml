@@ -30,7 +30,7 @@ jobs:
         run: uv sync
 
       - name: Initialize playwright
-        run: playwright install firefox
+        run: uv run playwright install firefox
 
       - name: Run clues-by-sam
-        run: clues-by-sam --no-wait
+        run: uv run clues-by-sam --no-wait
