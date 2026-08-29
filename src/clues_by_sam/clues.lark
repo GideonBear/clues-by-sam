@@ -38,6 +38,8 @@ clue: person "is" VERDICT                                                       
     | _there_is "more" VERDICT profession_p_region "than" profession_p_region                                       -> more_verdict_than_region
     | _there_is "more" VERDICT "s than" VERDICT "s" region                                                          -> more_verdict_than_verdict
     | _there_is "more" VERDICT "s than" VERDICT profession_p_region                                                 -> more_verdict_than_verdict
+    | _there_is "more" VERDICT "s" region "than" VERDICT "s" region                                                 -> more_verdict_region_than_verdict_region
+    | _there_is "more" VERDICT profession_p_region "than" VERDICT profession_p_region                               -> more_verdict_region_than_verdict_region
     | person "has an equal number of" ("innocent and criminal" | "criminal and innocent") personal_region_s         -> personal_equal_verdicts
     | person "has an equal number of" ("innocents and criminals" | "criminals and innocents") personal_region_p     -> personal_equal_verdicts
     | person "has more" VERDICT "than" VERDICT personal_region_s                                                    -> personal_more

@@ -310,6 +310,17 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
             verdict_b,
         )
 
+    def more_verdict_region_than_verdict_region(
+        self, c: tuple[Verdict, Region, Verdict, Region]
+    ) -> Clue:
+        verdict_a, region_a, verdict_b, region_b = c
+        return More(
+            region_a,
+            verdict_a,
+            region_b,
+            verdict_b,
+        )
+
     def personal_equal_verdicts(self, c: tuple[Person, PersonalRegion]) -> Clue:
         person, personal_region = c
         region = personal_region(person)
