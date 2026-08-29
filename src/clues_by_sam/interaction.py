@@ -17,16 +17,17 @@ from clues_by_sam.mover import Mover
 from clues_by_sam.parser import parse_clue
 
 
-def run(url: str) -> None:
+def run(url: str, *, headless: bool) -> None:
     with sync_playwright() as p:
-        browser = p.firefox.launch(headless=False)
+        browser = p.firefox.launch(headless=headless)
         page = browser.new_page()
         page.goto(url)
 
         game, people, knowns, clues = load_game(page)
         play_game(page, game, people, knowns, clues)
 
-        input("Press enter to continue...")
+        if not headless:
+            input("Press enter to continue...")
 
         browser.close()
 
