@@ -402,6 +402,10 @@ from clues_by_sam.parser import parse_clue
                 ),
             ),
         ),
+        (
+            "There are at least 3 innocents on the edges",
+            RegionClue(Edges(), Count(INNOCENT, AtLeast(3))),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
