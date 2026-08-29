@@ -2,7 +2,7 @@ name: Run live tests
 
 on:
   schedule:
-    - cron: 0 17 * * *
+    - cron: 0 6 * * *
   pull_request:
   workflow_dispatch:
 
