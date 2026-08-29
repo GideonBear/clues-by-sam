@@ -406,6 +406,17 @@ from clues_by_sam.parser import parse_clue
             "There are at least 3 innocents on the edges",
             RegionClue(Edges(), Count(INNOCENT, AtLeast(3))),
         ),
+        (
+            "Daniel is the only one with exactly 1 criminal neighbor",
+            Combined(
+                RegionClue(Neighboring(Person("Daniel")), Count(CRIMINAL, Exact(1))),
+                OnlyXPeople(
+                    Exact(1),
+                    All(),
+                    SimplePersonConstraint(Neighboring, Count(CRIMINAL, Exact(1))),
+                ),
+            ),
+        ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:

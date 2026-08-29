@@ -277,6 +277,15 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
             RegionClue(region, Count(verdict, Exact(1))),
         )
 
+    def only_with_neighbors(self, c: tuple[Person, Constraint]) -> Clue:
+        person, constraint = c
+        return Combined(
+            RegionClue(Neighboring(person), constraint),
+            OnlyXPeople(
+                Exact(1), All(), SimplePersonConstraint(Neighboring, constraint)
+            ),
+        )
+
     def equal_neighbors(self, c: tuple[Person, Person, Verdict]) -> Clue:
         person_a, person_b, verdict = c
         return Equal(

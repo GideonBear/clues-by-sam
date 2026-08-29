@@ -32,6 +32,7 @@ clue: person "is" VERDICT                                                       
     | x_people region ("has" | "have") constraint "neighbor" "s"?                                                               -> region_neighbors
     | amount PROFESSION "s"? ("has" | "have") constraint "neighbor" "s"?                                                        -> profession_neighbors
     | person_is "the only" VERDICT region                                                                                       -> only_in_region
+    | person_is "the only" ("person" | "one") "with" constraint "neighbor" "s"?                                                 -> only_with_neighbors
     | person "and" person "have an equal number of" VERDICT "neighbor" "s"?                                                     -> equal_neighbors
     | _there_is "an equal number of" VERDICT "s in" region_and_region                                                           -> equal_region_and_region
     | _there_is "as many" VERDICT profession_p_region "as there are" VERDICT profession_p_region                                -> equal_verdict_region_and_verdict_region
