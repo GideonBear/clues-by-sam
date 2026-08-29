@@ -19,7 +19,7 @@ from clues_by_sam.clues import (
     ConditionalPersonConstraint,
     Connected,
     ConnectedRegionClue,
-    DirectlyBelow,
+    Count,
     Edges,
     Equal,
     Exact,
@@ -30,7 +30,7 @@ from clues_by_sam.clues import (
     More,
     Neighboring,
     Not,
-    OnlyOne,
+    OnlyX,
     OnlyXPeople,
     Overlap,
     Parity,
@@ -42,6 +42,7 @@ from clues_by_sam.clues import (
     SimplePersonConstraint,
 )
 from clues_by_sam.game import Person, Profession
+from clues_by_sam.parser import parse_clue
 
 
 @pytest.mark.parametrize(
@@ -50,19 +51,20 @@ from clues_by_sam.game import Person, Profession
         (
             "Only 1 of the 2 criminals neighboring Kay is in column A",
             Combined(
-                RegionClue(Neighboring(Person("Kay")), Exact(CRIMINAL, 2)),
+                RegionClue(Neighboring(Person("Kay")), Count(CRIMINAL, Exact(2))),
                 RegionClue(
-                    Overlap(Neighboring(Person("Kay")), Column(0)), Exact(CRIMINAL, 1)
+                    Overlap(Neighboring(Person("Kay")), Column(0)),
+                    Count(CRIMINAL, Exact(1)),
                 ),
             ),
         ),
         (
             "There are exactly 2 innocents below Martin",
-            RegionClue(Below(Person("Martin")), Exact(INNOCENT, 2)),
+            RegionClue(Below(Person("Martin")), Count(INNOCENT, Exact(2))),
         ),
         (
             "There's an odd number of criminals in column D",
-            RegionClue(Column(3), Parity(CRIMINAL, 1)),
+            RegionClue(Column(3), Count(CRIMINAL, Parity(1))),
         ),
         (
             "All innocents below Eve are connected",
@@ -71,51 +73,56 @@ from clues_by_sam.game import Person, Profession
         (
             "Only 1 of the 3 criminals neighboring Martin is on the edges",
             Combined(
-                RegionClue(Neighboring(Person("Martin")), Exact(CRIMINAL, 3)),
+                RegionClue(Neighboring(Person("Martin")), Count(CRIMINAL, Exact(3))),
                 RegionClue(
                     Overlap(Neighboring(Person("Martin")), Edges()),
-                    Exact(CRIMINAL, 1),
+                    Count(CRIMINAL, Exact(1)),
                 ),
             ),
         ),
         (
             "There's an odd number of criminals in column A",
-            RegionClue(Column(0), Parity(CRIMINAL, 1)),
+            RegionClue(Column(0), Count(CRIMINAL, Parity(1))),
         ),
         (
             "There's an odd number of innocents below Betty",
-            RegionClue(Below(Person("Betty")), Parity(INNOCENT, 1)),
+            RegionClue(Below(Person("Betty")), Count(INNOCENT, Parity(1))),
         ),
         (
             "An odd number of innocents above Vera neighbor Martin",
             RegionClue(
                 Overlap(Above(Person("Vera")), Neighboring(Person("Martin"))),
-                Parity(INNOCENT, 1),
+                Count(INNOCENT, Parity(1)),
             ),
         ),
         (
             "Only one row has exactly 2 innocents",
-            OnlyOne(
-                RegionClue(Row(0), Exact(INNOCENT, 2)),
-                RegionClue(Row(1), Exact(INNOCENT, 2)),
-                RegionClue(Row(2), Exact(INNOCENT, 2)),
-                RegionClue(Row(3), Exact(INNOCENT, 2)),
-                RegionClue(Row(4), Exact(INNOCENT, 2)),
+            OnlyX(
+                (
+                    RegionClue(Row(0), Count(INNOCENT, Exact(2))),
+                    RegionClue(Row(1), Count(INNOCENT, Exact(2))),
+                    RegionClue(Row(2), Count(INNOCENT, Exact(2))),
+                    RegionClue(Row(3), Count(INNOCENT, Exact(2))),
+                    RegionClue(Row(4), Count(INNOCENT, Exact(2))),
+                ),
+                Exact(1),
             ),
         ),
         (
             "Only one person in row 3 has exactly 3 criminal neighbors",
             OnlyXPeople(
-                1, Row(2), SimplePersonConstraint(Neighboring, Exact(CRIMINAL, 3))
+                Exact(1),
+                Row(2),
+                SimplePersonConstraint(Neighboring, Count(CRIMINAL, Exact(3))),
             ),
         ),
         (
             "Column B is the only column with exactly 2 innocents",
             Combined(
-                RegionClue(Column(1), Exact(INNOCENT, 2)),
-                RegionClue(Column(0), Not(Exact(INNOCENT, 2))),
-                RegionClue(Column(2), Not(Exact(INNOCENT, 2))),
-                RegionClue(Column(3), Not(Exact(INNOCENT, 2))),
+                RegionClue(Column(1), Count(INNOCENT, Exact(2))),
+                RegionClue(Column(0), Not(Count(INNOCENT, Exact(2)))),
+                RegionClue(Column(2), Not(Count(INNOCENT, Exact(2)))),
+                RegionClue(Column(3), Not(Count(INNOCENT, Exact(2)))),
             ),
         ),
         (
@@ -125,15 +132,16 @@ from clues_by_sam.game import Person, Profession
                     Between(Person("Betty"), Person("Vera")),
                     Neighboring(Person("Kay")),
                 ),
-                Exact(INNOCENT, 1),
+                Count(INNOCENT, Exact(1)),
             ),
         ),
         (
             "Exactly 2 of the 4 innocents neighboring Will are in row 4",
             Combined(
-                RegionClue(Neighboring(Person("Will")), Exact(INNOCENT, 4)),
+                RegionClue(Neighboring(Person("Will")), Count(INNOCENT, Exact(4))),
                 RegionClue(
-                    Overlap(Neighboring(Person("Will")), Row(3)), Exact(INNOCENT, 2)
+                    Overlap(Neighboring(Person("Will")), Row(3)),
+                    Count(INNOCENT, Exact(2)),
                 ),
             ),
         ),
@@ -158,16 +166,16 @@ from clues_by_sam.game import Person, Profession
         (
             "Each row has at least 3 innocents",
             Combined(
-                RegionClue(Row(0), AtLeast(INNOCENT, 3)),
-                RegionClue(Row(1), AtLeast(INNOCENT, 3)),
-                RegionClue(Row(2), AtLeast(INNOCENT, 3)),
-                RegionClue(Row(3), AtLeast(INNOCENT, 3)),
-                RegionClue(Row(4), AtLeast(INNOCENT, 3)),
+                RegionClue(Row(0), Count(INNOCENT, AtLeast(3))),
+                RegionClue(Row(1), Count(INNOCENT, AtLeast(3))),
+                RegionClue(Row(2), Count(INNOCENT, AtLeast(3))),
+                RegionClue(Row(3), Count(INNOCENT, AtLeast(3))),
+                RegionClue(Row(4), Count(INNOCENT, AtLeast(3))),
             ),
         ),
         (
             "John has exactly 7 innocent neighbors",
-            RegionClue(Neighboring(Person("John")), Exact(INNOCENT, 7)),
+            RegionClue(Neighboring(Person("John")), Count(INNOCENT, Exact(7))),
         ),
         (
             "There's an equal number of innocents in rows 2 and 3",
@@ -177,34 +185,34 @@ from clues_by_sam.game import Person, Profession
             "Quita is one of Mark's 4 criminal neighbors",
             Combined(
                 Known(Person("Quita"), CRIMINAL),
-                RegionClue(Neighboring(Person("Mark")), Exact(CRIMINAL, 4)),
+                RegionClue(Neighboring(Person("Mark")), Count(CRIMINAL, Exact(4))),
             ),
         ),
         (
             "Gary and Mark have 3 innocent neighbors in common",
             RegionClue(
                 Overlap(Neighboring(Person("Gary")), Neighboring(Person("Mark"))),
-                Exact(INNOCENT, 3),
+                Count(INNOCENT, Exact(3)),
             ),
         ),
         (
             "There is only one innocent to the left of Carol",
-            RegionClue(Left(Person("Carol")), Exact(INNOCENT, 1)),
+            RegionClue(Left(Person("Carol")), Count(INNOCENT, Exact(1))),
         ),
         (
             "Ollie is one of 2 criminals in column C",
             Combined(
                 Known(Person("Ollie"), CRIMINAL),
-                RegionClue(Column(2), Exact(CRIMINAL, 2)),
+                RegionClue(Column(2), Count(CRIMINAL, Exact(2))),
             ),
         ),
         (
             "1 of the 2 criminals in column B is in between Mary and Quita",
             Combined(
-                RegionClue(Column(1), Exact(CRIMINAL, 2)),
+                RegionClue(Column(1), Count(CRIMINAL, Exact(2))),
                 RegionClue(
                     Overlap(Column(1), Between(Person("Mary"), Person("Quita"))),
-                    Exact(CRIMINAL, 1),
+                    Count(CRIMINAL, Exact(1)),
                 ),
             ),
         ),
@@ -216,20 +224,23 @@ from clues_by_sam.game import Person, Profession
             "I'm the only innocent to the right of Quita",
             Combined(
                 Known(Person("Me"), INNOCENT),
-                RegionClue(Right(Person("Quita")), Exact(INNOCENT, 1)),
+                RegionClue(Right(Person("Quita")), Count(INNOCENT, Exact(1))),
             ),
         ),
         (
             "Both innocents above Wanda are connected",
             Combined(
-                RegionClue(Above(Person("Wanda")), Exact(INNOCENT, 2)),
+                RegionClue(Above(Person("Wanda")), Count(INNOCENT, Exact(2))),
                 ConnectedRegionClue(Above(Person("Wanda")), Connected(INNOCENT)),
             ),
         ),
         (
             "2 mechs have a criminal directly below them",
-            RegionClue(
-                DirectlyBelow(ProfessionRegion(Profession("mech"))), Exact(CRIMINAL, 2)
+            # Used to be a RegionClue(DirectlyBelow(ProfessionRegion(...))), but this is the generalized approach
+            OnlyXPeople(
+                Exact(2),
+                ProfessionRegion(Profession("mech")),
+                SimplePersonConstraint(ANY, Count(CRIMINAL, Exact(1))),
             ),
         ),
         (
@@ -254,7 +265,7 @@ from clues_by_sam.game import Person, Profession
             "Pam and Wanda have one innocent neighbor in common",
             RegionClue(
                 Overlap(Neighboring(Person("Pam")), Neighboring(Person("Wanda"))),
-                Exact(INNOCENT, 1),
+                Count(INNOCENT, Exact(1)),
             ),
         ),
         (
@@ -269,58 +280,67 @@ from clues_by_sam.game import Person, Profession
         (
             "Only 1 criminal in column C has an innocent directly to the left of them",
             OnlyXPeople(
-                1,
+                Exact(1),
                 Column(2),
                 # Should be DirectlyLeft but wrapped with a lambda to add SinglePerson
-                ConditionalPersonConstraint(ANY, Exact(INNOCENT, 1), CRIMINAL),
+                ConditionalPersonConstraint(ANY, Count(INNOCENT, Exact(1)), CRIMINAL),
             ),
         ),
         (
             "Only one cook has exactly 6 criminal neighbors",
             OnlyXPeople(
-                1,
+                Exact(1),
                 ProfessionRegion(Profession("cook")),
-                SimplePersonConstraint(Neighboring, Exact(CRIMINAL, 6)),
+                SimplePersonConstraint(Neighboring, Count(CRIMINAL, Exact(6))),
             ),
         ),
-        ("There are 8 innocents in total", RegionClue(All(), Exact(INNOCENT, 8))),
+        (
+            "There are 8 innocents in total",
+            RegionClue(All(), Count(INNOCENT, Exact(8))),
+        ),
         (
             "I'm one of 2 criminals in my column",
             Combined(
                 Known(Person("Me"), CRIMINAL),
-                RegionClue(ColumnOf(Person("Me")), Exact(CRIMINAL, 2)),
+                RegionClue(ColumnOf(Person("Me")), Count(CRIMINAL, Exact(2))),
             ),
         ),
         (
             "No one in row 5 has more than 2 innocent neighbors",
             OnlyXPeople(
-                0, Row(4), SimplePersonConstraint(Neighboring, AtLeast(INNOCENT, 3))
+                Exact(0),
+                Row(4),
+                SimplePersonConstraint(Neighboring, Count(INNOCENT, AtLeast(3))),
             ),
         ),
         (
             "Exactly 3 of Henry's 6 criminal neighbors also neighbor Barb",
             Combined(
-                RegionClue(Neighboring(Person("Henry")), Exact(CRIMINAL, 6)),
+                RegionClue(Neighboring(Person("Henry")), Count(CRIMINAL, Exact(6))),
                 RegionClue(
                     Overlap(Neighboring(Person("Henry")), Neighboring(Person("Barb"))),
-                    Exact(CRIMINAL, 3),
+                    Count(CRIMINAL, Exact(3)),
                 ),
             ),
         ),
         (
             "4 persons on the edges have an innocent directly to the right of them",
             # Should be DirectlyRight but wrapped with a lambda to add SinglePerson
-            OnlyXPeople(4, Edges(), SimplePersonConstraint(ANY, Exact(INNOCENT, 1))),
+            OnlyXPeople(
+                Exact(4),
+                Edges(),
+                SimplePersonConstraint(ANY, Count(INNOCENT, Exact(1))),
+            ),
         ),
         (
             "There is at least one criminal among all professions",
-            ForEveryProfession(AtLeast(CRIMINAL, 1)),
+            ForEveryProfession(Count(CRIMINAL, AtLeast(1))),
         ),
         (
             "Gary is one of two or more innocents in row 2",
             Combined(
                 Known(Person("Gary"), INNOCENT),
-                RegionClue(Row(1), AtLeast(INNOCENT, 2)),
+                RegionClue(Row(1), Count(INNOCENT, AtLeast(2))),
             ),
         ),
         (
@@ -339,7 +359,9 @@ from clues_by_sam.game import Person, Profession
         ),
         (
             "2 criminals in my row are on the edges",
-            RegionClue(Overlap(RowOf(Person("Me")), Edges()), Exact(CRIMINAL, 2)),
+            RegionClue(
+                Overlap(RowOf(Person("Me")), Edges()), Count(CRIMINAL, Exact(2))
+            ),
         ),
         (
             "There are more criminals than innocents above Ryan",
@@ -351,14 +373,26 @@ from clues_by_sam.game import Person, Profession
                 Overlap(
                     ProfessionRegion(Profession("coder")), Neighboring(Person("Xola"))
                 ),
-                Exact(INNOCENT, 1),
+                Count(INNOCENT, Exact(1)),
             ),
         ),
         (
             "Everyone has at least 2 criminal neighbors",
-            ForEvery(All(), SimplePersonConstraint(Neighboring, AtLeast(CRIMINAL, 2))),
+            ForEvery(
+                All(), SimplePersonConstraint(Neighboring, Count(CRIMINAL, AtLeast(2)))
+            ),
+        ),
+        # Unencountered
+        (
+            "Gary has an equal number of innocent and criminal neighbors",
+            Equal(
+                Neighboring(Person("Gary")),
+                INNOCENT,
+                Neighboring(Person("Gary")),
+                CRIMINAL,
+            ),
         ),
     ],
 )
 def test_parse_clues(clue: str, expected: Clue) -> None:
-    assert Clue.parse(clue, Person("Me")) == expected
+    assert parse_clue(clue, Person("Me")) == expected

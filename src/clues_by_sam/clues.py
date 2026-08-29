@@ -4,14 +4,12 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
 from functools import reduce
-from string import ascii_uppercase
 from typing import TYPE_CHECKING, Self, override
 
 import z3  # type: ignore[import-not-found]
-from z3 import And, BoolRef, If, IntNumRef, PbEq, Sum
+from z3 import And, BoolRef, If, IntNumRef, PbEq, PbGe, Sum
 
-from clues_by_sam.game import COLUMNS, ROWS, Field, Person, Profession
-from clues_by_sam.utils import splitlist
+from clues_by_sam.game import Field, Person, Profession
 
 
 if TYPE_CHECKING:
@@ -28,109 +26,19 @@ class Verdict(Enum):
     def __repr__(self) -> str:
         return self.name
 
-    @classmethod
-    def parse(cls, verdict: str) -> Self:
-        verdict = verdict.removesuffix("s")
-        return cls[verdict.upper()]
-
 
 INNOCENT = Verdict.INNOCENT
 CRIMINAL = Verdict.CRIMINAL
-
-
-PROFESSIONS = {
-    "coder",
-    "painter",
-    "pilot",
-    "builder",
-    "mech",
-    "clerk",
-    "cop",
-    "judge",
-    "sleuth",
-    "singer",
-    "teacher",
-    "guard",
-    "farmer",
-    "cook",
-    "doctor",
-}
-
-
-def parse_profession(s: str) -> Profession | None:
-    s = s.removesuffix("s")
-    if s in PROFESSIONS:
-        return Profession(s)
-    return None
 
 
 class Region(ABC):
     @abstractmethod
     def people(self, field: Field) -> Iterable[Person]: ...
 
-    @classmethod
-    def parse_region(cls, region: Sequence[str], me: Person) -> Region:  # ruff: ignore[complex-structure, too-many-branches]
-        if region[0] in {"is", "are", "also", "who"}:
-            region = region[1:]
-        for i in range(1, len(region) + 1):
-            found: Region | None = None
-            match region[:i]:
-                case ["in", "total"]:
-                    found = All()
-                case ["on", "the", "edges"]:
-                    found = Edges()
-                case ["in", "a" | "the", "corner" | "corners"]:
-                    found = Corners()
-                case ["in", "column", column] | ["column", column]:
-                    found = Column.parse(column)
-                case ["in", "row", row] | ["row", row]:
-                    found = Row.parse(row)
-                case ["in", "my", "column"]:
-                    found = ColumnOf(me)
-                case ["in", "my", "row"]:
-                    found = RowOf(me)
-                case ["above", person]:
-                    found = Above(parse_person(person, me))
-                case ["below", person]:
-                    found = Below(parse_person(person, me))
-                case ["to", "the", "left", "of", person]:
-                    found = Left(parse_person(person, me))
-                case ["to", "the", "right", "of", person]:
-                    found = Right(parse_person(person, me))
-                case ["in", "between", a, "and", b]:
-                    found = Between(parse_person(a, me), parse_person(b, me))
-                case ["neighbor" | "neighbors" | "neighboring", person]:
-                    found = Neighboring(parse_person(person, me))
-                case [person, "neighbor" | "neighbors"]:
-                    found = Neighboring(parse_person(person, me))
-                case [profession] | ["us", str(), profession] if (
-                    profession_p := parse_profession(profession)
-                ) is not None:
-                    found = ProfessionRegion(profession_p)
-                case _:
-                    pass
-
-            if found is not None:
-                rest = region[i:]
-                if len(rest) == 0:
-                    return found
-                return Overlap(found, cls.parse_region(rest, me))
-
-        msg = f"Unknown region: '{" ".join(region)}'"
-        raise ValueError(msg)
-
 
 class ConnectedRegion(Region, ABC):
     @abstractmethod
     def people(self, field: Field) -> Sequence[Person]: ...
-
-    @classmethod
-    def parse_region(cls, region: Sequence[str], me: Person) -> ConnectedRegion:
-        region_p = Region.parse_region(region, me)
-        if not isinstance(region_p, ConnectedRegion):
-            msg = f"Expected a connected region, got: '{" ".join(region)}'"
-            raise ValueError(msg)  # ruff: ignore[type-check-without-type-error]
-        return region_p
 
 
 @dataclass(frozen=True)
@@ -293,10 +201,6 @@ class Row(ConnectedRegion):
     def people(self, field: Field) -> Sequence[Person]:
         return field[self.row]
 
-    @classmethod
-    def parse(cls, row: str) -> Self:
-        return cls(int(row) - 1)
-
 
 @dataclass(frozen=True)
 class Column(ConnectedRegion):
@@ -304,10 +208,6 @@ class Column(ConnectedRegion):
 
     def people(self, field: Field) -> Sequence[Person]:
         return field.column(self.column)
-
-    @classmethod
-    def parse(cls, column: str) -> Self:
-        return cls(ascii_uppercase.index(column))
 
 
 @dataclass(frozen=True)
@@ -390,6 +290,46 @@ class Constraint(ConnectedConstraint, ABC):
     ) -> BoolRef: ...
 
 
+class Amount(ABC):
+    @abstractmethod
+    def cmp(self, actual: IntNumRef) -> BoolRef: ...
+    @abstractmethod
+    def pb(self, args: Iterable[tuple[BoolRef, int]]) -> BoolRef: ...
+
+
+@dataclass(frozen=True)
+class Exact(Amount):
+    amount: int
+
+    def cmp(self, actual: IntNumRef) -> BoolRef:
+        return actual == self.amount
+
+    def pb(self, args: Iterable[tuple[BoolRef, int]]) -> BoolRef:
+        return PbEq(args, self.amount)
+
+
+@dataclass(frozen=True)
+class AtLeast(Amount):
+    amount: int
+
+    def cmp(self, actual: IntNumRef) -> BoolRef:
+        return actual >= self.amount
+
+    def pb(self, args: Iterable[tuple[BoolRef, int]]) -> BoolRef:
+        return PbGe(args, self.amount)
+
+
+@dataclass(frozen=True)
+class Parity(Amount):
+    parity: int
+
+    def cmp(self, actual: IntNumRef) -> BoolRef:
+        return actual % 2 == self.parity
+
+    def pb(self, args: Iterable[tuple[BoolRef, int]]) -> BoolRef:
+        raise NotImplementedError
+
+
 def count(
     people: Iterable[Person], people_m: Mapping[Person, BoolRef], verdict: Verdict
 ) -> IntNumRef:
@@ -401,47 +341,14 @@ def count(
 
 
 @dataclass(frozen=True)
-class Exact(Constraint):
+class Count(Constraint):
     typ: Verdict
-    amount: int
+    amount: Amount
 
     def z3(
         self, people: Iterable[Person], people_m: Mapping[Person, BoolRef]
     ) -> BoolRef:
-        return count(people, people_m, self.typ) == self.amount
-
-
-@dataclass(frozen=True)
-class AtLeast(Constraint):
-    typ: Verdict
-    amount: int
-
-    def z3(
-        self, people: Iterable[Person], people_m: Mapping[Person, BoolRef]
-    ) -> BoolRef:
-        return count(people, people_m, self.typ) >= self.amount
-
-
-@dataclass(frozen=True)
-class Parity(Constraint):
-    typ: Verdict
-    parity: int
-
-    @classmethod
-    def parse(cls, verdict: str, parity_s: str) -> Self:
-        if parity_s == "even":
-            parity = 0
-        elif parity_s == "odd":
-            parity = 1
-        else:
-            msg = f"Parity should be one of 'even' or 'odd', got '{parity_s}'"
-            raise ValueError(msg)
-        return cls(Verdict.parse(verdict), parity)
-
-    def z3(
-        self, people: Iterable[Person], people_m: Mapping[Person, BoolRef]
-    ) -> BoolRef:
-        return count(people, people_m, self.typ) % 2 == self.parity
+        return self.amount.cmp(count(people, people_m, self.typ))
 
 
 @dataclass(frozen=True)
@@ -488,1055 +395,9 @@ class Not(Constraint):
         return z3.Not(self.constraint.z3(people, people_m))
 
 
-nums = {
-    "no": 0,
-    "zero": 0,
-    "one": 1,
-    "two": 2,
-    "three": 3,
-    "four": 4,
-    "five": 5,
-    "six": 6,
-    "seven": 7,
-    "eight": 8,
-    "nine": 9,
-    "ten": 10,
-}
-
-
-def parse_num(s: str) -> int:
-    if s in nums:
-        return nums[s]
-    return int(s)
-
-
-def parse_person(s: str, me: Person) -> Person:
-    if s.lower() in {"me", "my"}:
-        return me
-    s = s.removesuffix("'s")
-    return Person(s)
-
-
-def parse_directly_full(s: Sequence[str]) -> Callable[[Region], Region]:
-    match s:
-        case [direction]:
-            return parse_directly_partial(direction)
-        case ["to", "the", direction] | ["to", "the", direction, "of"]:
-            return parse_directly_partial(direction)
-        case _:
-            msg = f"Unknown direction for 'directly ...': {s}"
-            raise ValueError(msg)
-
-
-def parse_directly_partial(s: str) -> Callable[[Region], Region]:
-    match s:
-        case "above":
-            return DirectlyAbove
-        case "below":
-            return DirectlyBelow
-        case "left":
-            return DirectlyLeft
-        case "right":
-            return DirectlyRight
-        case _:
-            msg = f"Unknown direction for 'directly ...': {s}"
-            raise ValueError(msg)
-
-
 class Clue(ABC):
     @abstractmethod
     def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef: ...
-
-    @classmethod
-    def parse(cls, clue_s: str, me: Person) -> Clue:  # ruff: ignore[complex-structure, too-many-branches, too-many-locals, too-many-return-statements, too-many-statements]
-        clue = clue_s.split()
-        # Note that it does not matter what regions apply to:
-        #  "An odd number of innocents above Vera neighbor Martin" means the same as
-        #  "The number of innocents that are above Vera and neighbor Martin is odd"
-        # Additionally, a clue such as:
-        #  "Only 1 of the 2 criminals neighboring Kay is in column A" means the same as
-        #  "There are 2 criminals neighboring Kay and there is 1 criminal that is
-        #  neighboring Kay and in column A".
-        #  The "only" is implied by "there is (exactly) 1 criminal".
-        match clue:
-            case [person, "is", "innocent" | "criminal" as verdict] | [
-                person,
-                "is",
-                "a" | "an",
-                "innocent" | "criminal" as verdict,
-            ]:
-                return Known(parse_person(person, me), Verdict.parse(verdict))
-
-            case (
-                [
-                    "Exactly" | "Only",
-                    amount,
-                    "person"
-                    | "people"
-                    | "persons"
-                    | "innocent"
-                    | "innocents"
-                    | "criminal"
-                    | "criminals" as a_verdict,
-                    *a_region,
-                    "has" | "have",
-                    "a" | "an",
-                    "innocent" | "criminal" as b_verdict,
-                    "directly",
-                    "above" | "below" as direction_s,
-                    "them",
-                ]
-                | [
-                    "Exactly" | "Only",
-                    amount,
-                    "person"
-                    | "people"
-                    | "persons"
-                    | "innocent"
-                    | "innocents"
-                    | "criminal"
-                    | "criminals" as a_verdict,
-                    *a_region,
-                    "has" | "have",
-                    "a" | "an",
-                    "innocent" | "criminal" as b_verdict,
-                    "directly",
-                    "to",
-                    "the",
-                    "left" | "right" as direction_s,
-                    "of",
-                    "them",
-                ]
-                | [
-                    amount,
-                    "person"
-                    | "people"
-                    | "persons"
-                    | "innocent"
-                    | "innocents"
-                    | "criminal"
-                    | "criminals" as a_verdict,
-                    *a_region,
-                    "has" | "have",
-                    "a" | "an",
-                    "innocent" | "criminal" as b_verdict,
-                    "directly",
-                    "above" | "below" as direction_s,
-                    "them",
-                ]
-                | [
-                    amount,
-                    "person"
-                    | "people"
-                    | "persons"
-                    | "innocent"
-                    | "innocents"
-                    | "criminal"
-                    | "criminals" as a_verdict,
-                    *a_region,
-                    "has" | "have",
-                    "a" | "an",
-                    "innocent" | "criminal" as b_verdict,
-                    "directly",
-                    "to",
-                    "the",
-                    "left" | "right" as direction_s,
-                    "of",
-                    "them",
-                ]
-            ):
-                amount_p = parse_num(amount)
-                a_region_p = Region.parse_region(a_region, me)
-                b_verdict_p = Verdict.parse(b_verdict)
-
-                if a_verdict in {"person", "people", "persons"}:
-                    return OnlyXPeople(
-                        amount_p,
-                        a_region_p,
-                        SimplePersonConstraint(
-                            lambda p: parse_directly_partial(direction_s)(
-                                SinglePerson(p)
-                            ),
-                            Exact(b_verdict_p, 1),
-                        ),
-                    )
-
-                a_verdict_p = Verdict.parse(a_verdict)
-                return OnlyXPeople(
-                    amount_p,
-                    a_region_p,
-                    ConditionalPersonConstraint(
-                        lambda p: parse_directly_partial(direction_s)(SinglePerson(p)),
-                        Exact(b_verdict_p, 1),
-                        a_verdict_p,
-                    ),
-                )
-
-            case (
-                [
-                    "An",
-                    "odd" | "even" as parity,
-                    "number",
-                    "of",
-                    "innocents" | "criminals" as verdict,
-                    *region,
-                ]
-                | [
-                    "There's",
-                    "an",
-                    "odd" | "even" as parity,
-                    "number",
-                    "of",
-                    "innocents" | "criminals" as verdict,
-                    *region,
-                ]
-                | [
-                    "An",
-                    "odd" | "even" as parity,
-                    "number",
-                    "of",
-                    *region,
-                    "are",
-                    "innocent" | "criminal" as verdict,
-                ]
-            ):
-                return RegionClue(
-                    Region.parse_region(region, me), Parity.parse(verdict, parity)
-                )
-
-            case [
-                "All",
-                "innocents" | "criminals" as verdict,
-                *region,
-                "are",
-                "connected",
-            ]:
-                return ConnectedRegionClue(
-                    ConnectedRegion.parse_region(region, me),
-                    Connected(Verdict.parse(verdict)),
-                )
-
-            case [
-                "Exactly" | "Only",
-                spec_amount,
-                "of",
-                "the",
-                total_amount,
-                "innocents" | "criminals" as verdict,
-                *region_is_region,
-            ] | [
-                spec_amount,
-                "of",
-                "the",
-                total_amount,
-                "innocents" | "criminals" as verdict,
-                *region_is_region,
-            ]:
-                if "is" in region_is_region:
-                    total_region_s, spec_region_s = splitlist(region_is_region, "is")
-                elif "are" in region_is_region:
-                    total_region_s, spec_region_s = splitlist(region_is_region, "are")
-                else:
-                    msg = (
-                        f"Expected to find 'is' or 'are' in this combined clue: "
-                        f"'{clue_s}'"
-                    )
-                    raise ValueError(msg)
-                total_region = Region.parse_region(total_region_s, me)
-                spec_region = Region.parse_region(spec_region_s, me)
-                verdict_p = Verdict.parse(verdict)
-                return Combined(
-                    RegionClue(total_region, Exact(verdict_p, parse_num(total_amount))),
-                    RegionClue(
-                        Overlap(total_region, spec_region),
-                        Exact(verdict_p, parse_num(spec_amount)),
-                    ),
-                )
-
-            case [
-                "Exactly" | "Only",
-                spec_amount,
-                "of",
-                total_person,
-                total_amount,
-                "innocent" | "criminal" as verdict,
-                "neighbors",
-                *spec_region_s,
-            ] | [
-                spec_amount,
-                "of",
-                total_person,
-                total_amount,
-                "innocent" | "criminal" as verdict,
-                "neighbors",
-                *spec_region_s,
-            ]:
-                total_region = Neighboring(parse_person(total_person, me))
-                spec_region = Region.parse_region(spec_region_s, me)
-                verdict_p = Verdict.parse(verdict)
-                return Combined(
-                    RegionClue(
-                        total_region,
-                        Exact(verdict_p, parse_num(total_amount)),
-                    ),
-                    RegionClue(
-                        Overlap(total_region, spec_region),
-                        Exact(verdict_p, parse_num(spec_amount)),
-                    ),
-                )
-
-            case (
-                [
-                    "Exactly" | "Only",
-                    spec_amount,
-                    "of",
-                    "the",
-                    str(),
-                    profession,
-                    *region,
-                    "is",
-                    "innocent" | "criminal" as verdict,
-                ]
-                | [
-                    spec_amount,
-                    "of",
-                    "the",
-                    str(),
-                    profession,
-                    *region,
-                    "is",
-                    "innocent" | "criminal" as verdict,
-                ]
-                | [
-                    "Exactly" | "Only",
-                    spec_amount,
-                    "of",
-                    "the",
-                    str(),
-                    profession,
-                    *region,
-                    "is",
-                    "a" | "an",
-                    "innocent" | "criminal" as verdict,
-                ]
-                | (
-                    [
-                        spec_amount,
-                        "of",
-                        "the",
-                        str(),
-                        profession,
-                        *region,
-                        "is",
-                        "a" | "an",
-                        "innocent" | "criminal" as verdict,
-                    ]
-                )
-            ) if (profession_p := parse_profession(profession)) is not None:
-                return RegionClue(
-                    Overlap(
-                        ProfessionRegion(profession_p), Region.parse_region(region, me)
-                    ),
-                    Exact(Verdict.parse(verdict), int(spec_amount)),
-                )
-
-            case [
-                "Exactly" | "Only",
-                "one",
-                "row" | "column" as typ,
-                "has",
-                "exactly" | "only",
-                amount,
-                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
-            ]:
-                region_type = Row if typ == "row" else Column
-                num = ROWS if typ == "row" else COLUMNS
-                return OnlyOne(
-                    *(
-                        RegionClue(
-                            region_type(i),
-                            Exact(Verdict.parse(verdict), parse_num(amount)),
-                        )
-                        for i in range(num)
-                    )
-                )
-
-            case [
-                "Column" | "Row" as typ_1,
-                row_or_column,
-                "is",
-                "the",
-                "only",
-                typ_2,
-                "with",
-                "exactly" | "only",
-                amount,
-                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
-            ] if typ_1.lower() == typ_2:
-                region_type = Row if typ_2 == "row" else Column
-                num = ROWS if typ_2 == "row" else COLUMNS
-                verdict_p = Verdict.parse(verdict)
-                row_or_column_p = region_type.parse(row_or_column)
-                return Combined(
-                    *(
-                        RegionClue(
-                            region_type(i),
-                            Exact(verdict_p, parse_num(amount)),
-                        )
-                        if region_type(i) == row_or_column_p
-                        else RegionClue(
-                            region_type(i), Not(Exact(verdict_p, parse_num(amount)))
-                        )
-                        for i in range(num)
-                    )
-                )
-
-            case [
-                "Column" | "Row" as typ_1,
-                row_or_column,
-                "has",
-                "more",
-                "innocents" | "criminals" as verdict,
-                "than",
-                "any",
-                "other",
-                typ_2,
-            ] if typ_1.lower() == typ_2:
-                region_type = Row if typ_2 == "row" else Column
-                num = ROWS if typ_2 == "row" else COLUMNS
-                verdict_p = Verdict.parse(verdict)
-                row_or_column_p = region_type.parse(row_or_column)
-                return Combined(
-                    *(
-                        More(row_or_column_p, verdict_p, region_type(i), verdict_p)
-                        for i in range(num)
-                        if region_type(i) != row_or_column_p
-                    )
-                )
-
-            case [
-                a,
-                "is",
-                "one",
-                "of",
-                b,
-                amount,
-                "innocent" | "criminal" as verdict,
-                "neighbors",
-            ]:
-                verdict_p = Verdict.parse(verdict)
-                return Combined(
-                    Known(parse_person(a, me), verdict_p),
-                    RegionClue(
-                        Neighboring(parse_person(b, me)),
-                        Exact(verdict_p, parse_num(amount)),
-                    ),
-                )
-
-            case [
-                person,
-                "is",
-                "one",
-                "of",
-                amount,
-                "innocents" | "criminals" as verdict,
-                *region,
-            ]:
-                verdict_p = Verdict.parse(verdict)
-                return Combined(
-                    Known(parse_person(person, me), verdict_p),
-                    RegionClue(
-                        Region.parse_region(region, me),
-                        Exact(verdict_p, parse_num(amount)),
-                    ),
-                )
-
-            case [
-                person,
-                "is",
-                "one",
-                "of",
-                amount,
-                "or",
-                "more",
-                "innocents" | "criminals" as verdict,
-                *region,
-            ]:
-                verdict_p = Verdict.parse(verdict)
-                return Combined(
-                    Known(parse_person(person, me), verdict_p),
-                    RegionClue(
-                        Region.parse_region(region, me),
-                        AtLeast(verdict_p, parse_num(amount)),
-                    ),
-                )
-
-            case [
-                person,
-                "has",
-                "exactly" | "only",
-                amount,
-                "innocent" | "criminal" as verdict,
-                "neighbors",
-            ] | [
-                person,
-                "has",
-                amount,
-                "innocent" | "criminal" as verdict,
-                "neighbors",
-            ]:
-                return RegionClue(
-                    Neighboring(parse_person(person, me)),
-                    Exact(Verdict.parse(verdict), parse_num(amount)),
-                )
-
-            case [
-                person,
-                "is",
-                "the",
-                "only",
-                "innocent" | "criminal" as verdict,
-                *region,
-            ]:
-                verdict_p = Verdict.parse(verdict)
-                return Combined(
-                    Known(parse_person(person, me), verdict_p),
-                    RegionClue(Region.parse_region(region, me), Exact(verdict_p, 1)),
-                )
-
-            case [
-                "I'm",
-                "the",
-                "only",
-                "innocent" | "criminal" as verdict,
-                *region,
-            ]:
-                verdict_p = Verdict.parse(verdict)
-                return Combined(
-                    Known(me, verdict_p),
-                    RegionClue(Region.parse_region(region, me), Exact(verdict_p, 1)),
-                )
-
-            case [
-                "I'm",
-                "one",
-                "of",
-                amount,
-                "innocents" | "criminals" as verdict,
-                *region,
-            ]:
-                verdict_p = Verdict.parse(verdict)
-                return Combined(
-                    Known(me, verdict_p),
-                    RegionClue(
-                        Region.parse_region(region, me),
-                        Exact(verdict_p, parse_num(amount)),
-                    ),
-                )
-
-            case (
-                [
-                    "Exactly" | "Only",
-                    a_amount,
-                    "person" | "people" | "persons",
-                    *region,
-                    "has" | "have",
-                    "exactly" | "only",
-                    b_amount,
-                    "innocent" | "criminal" as verdict,
-                    "neighbors",
-                ]
-                | [
-                    a_amount,
-                    "person" | "people" | "persons",
-                    *region,
-                    "has" | "have",
-                    "exactly" | "only",
-                    b_amount,
-                    "innocent" | "criminal" as verdict,
-                    "neighbors",
-                ]
-                | [
-                    "Exactly" | "Only",
-                    a_amount,
-                    "person" | "people" | "persons",
-                    *region,
-                    "has" | "have",
-                    b_amount,
-                    "innocent" | "criminal" as verdict,
-                    "neighbors",
-                ]
-                | [
-                    a_amount,
-                    "person" | "people" | "persons",
-                    *region,
-                    "has" | "have",
-                    b_amount,
-                    "innocent" | "criminal" as verdict,
-                    "neighbors",
-                ]
-            ):
-                return OnlyXPeople(
-                    parse_num(a_amount),
-                    Region.parse_region(region, me),
-                    SimplePersonConstraint(
-                        Neighboring, Exact(Verdict.parse(verdict), parse_num(b_amount))
-                    ),
-                )
-
-            case [
-                a,
-                "and",
-                b,
-                "have",
-                "an",
-                "equal",
-                "number",
-                "of",
-                "innocent" | "criminal" as verdict,
-                "neighbors",
-            ]:
-                verdict_p = Verdict.parse(verdict)
-                return Equal(
-                    Neighboring(parse_person(a, me)),
-                    verdict_p,
-                    Neighboring(parse_person(b, me)),
-                    verdict_p,
-                )
-
-            case [
-                "There's",
-                "an",
-                "equal",
-                "number",
-                "of",
-                "innocents" | "criminals" as verdict,
-                "in",
-                "rows" | "columns" as typ,
-                a,
-                "and",
-                b,
-            ]:
-                region_type = Row if typ == "rows" else Column
-                verdict_p = Verdict.parse(verdict)
-                return Equal(
-                    region_type.parse(a), verdict_p, region_type.parse(b), verdict_p
-                )
-
-            case [
-                "There's",
-                "an",
-                "equal",
-                "number",
-                "of",
-                "innocent" | "innocents" | "criminal" | "criminals",
-                "and",
-                "criminal" | "criminals" | "innocent" | "innocents",
-                *region,
-            ] | [
-                "There",
-                "is" | "are",
-                "an",
-                "equal",
-                "number",
-                "of",
-                "innocent" | "innocents" | "criminal" | "criminals",
-                "and",
-                "criminal" | "criminals" | "innocent" | "innocents",
-                *region,
-            ]:
-                region_p = Region.parse_region(region, me)
-                return Equal(region_p, INNOCENT, region_p, CRIMINAL)
-
-            case [
-                "There",
-                "are",
-                "more",
-                "innocent" | "innocents" | "criminal" | "criminals" as verdict_1,
-                "than",
-                "criminal" | "criminals" | "innocent" | "innocents" as verdict_2,
-                *region,
-            ]:
-                region_p = Region.parse_region(region, me)
-                return More(
-                    region_p,
-                    Verdict.parse(verdict_1),
-                    region_p,
-                    Verdict.parse(verdict_2),
-                )
-
-            case [
-                "There",
-                "are",
-                "more",
-                "innocents" | "criminals" as verdict,
-                *region_than_region,
-            ] if "than" in region_than_region:
-                region_a, region_b = splitlist(region_than_region, "than")
-                verdict_p = Verdict.parse(verdict)
-                return More(
-                    Region.parse_region(region_a, me),
-                    verdict_p,
-                    Region.parse_region(region_b, me),
-                    verdict_p,
-                )
-
-            case [
-                a,
-                "has",
-                "more",
-                "innocent" | "criminal" as verdict,
-                "neighbors",
-                "than",
-                b,
-            ]:
-                verdict_p = Verdict.parse(verdict)
-                return More(
-                    Neighboring(parse_person(a, me)),
-                    verdict_p,
-                    Neighboring(parse_person(b, me)),
-                    verdict_p,
-                )
-
-            case [
-                a,
-                "and",
-                b,
-                "have",
-                amount,
-                "innocent" | "criminal" as verdict,
-                "neighbor" | "neighbors",
-                "in",
-                "common",
-            ] | [
-                a,
-                "and",
-                b,
-                "have",
-                "exactly" | "only",
-                amount,
-                "innocent" | "criminal" as verdict,
-                "neighbor" | "neighbors",
-                "in",
-                "common",
-            ]:
-                return RegionClue(
-                    Overlap(
-                        Neighboring(parse_person(a, me)),
-                        Neighboring(parse_person(b, me)),
-                    ),
-                    Exact(Verdict.parse(verdict), parse_num(amount)),
-                )
-
-            case [
-                "Each",
-                "row" | "column" as typ,
-                "has",
-                "at",
-                "least",
-                amount,
-                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
-            ]:
-                region_type = Row if typ == "row" else Column
-                num = ROWS if typ == "row" else COLUMNS
-                verdict_p = Verdict.parse(verdict)
-                return Combined(
-                    *(
-                        RegionClue(
-                            region_type(i),
-                            AtLeast(verdict_p, parse_num(amount)),
-                        )
-                        for i in range(num)
-                    )
-                )
-
-            case [
-                "Everyone",
-                "has",
-                "at",
-                "least",
-                amount,
-                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
-                "neighbor" | "neighbors",
-            ]:
-                return ForEvery(
-                    All(),
-                    SimplePersonConstraint(
-                        Neighboring, AtLeast(Verdict.parse(verdict), parse_num(amount))
-                    ),
-                )
-
-            case [
-                "Both",
-                "innocents" | "criminals" as verdict,
-                *region,
-                "are",
-                "connected",
-            ]:
-                verdict_p = Verdict.parse(verdict)
-                region_p = ConnectedRegion.parse_region(region, me)
-                return Combined(
-                    RegionClue(region_p, Exact(verdict_p, 2)),
-                    ConnectedRegionClue(region_p, Connected(verdict_p)),
-                )
-
-            case [
-                person,
-                "has",
-                "more",
-                "innocent" | "criminal" as a_verdict,
-                "than",
-                "innocent" | "criminal" as b_verdict,
-                "neighbors",
-            ]:
-                return More(
-                    Neighboring(parse_person(person, me)),
-                    Verdict.parse(a_verdict),
-                    Neighboring(parse_person(person, me)),
-                    Verdict.parse(b_verdict),
-                )
-
-            case (
-                [
-                    amount,
-                    profession,
-                    "has" | "have",
-                    "a" | "an",
-                    "innocent" | "criminal" as verdict,
-                    "directly",
-                    *direction,
-                    "them",
-                ]
-                | [
-                    "Only" | "Exactly",
-                    amount,
-                    profession,
-                    "has" | "have",
-                    "a" | "an",
-                    "innocent" | "criminal" as verdict,
-                    "directly",
-                    *direction,
-                    "them",
-                ]
-                | [
-                    amount,
-                    "of",
-                    "us",
-                    profession,
-                    "has" | "have",
-                    "a" | "an",
-                    "innocent" | "criminal" as verdict,
-                    "directly",
-                    *direction,
-                    "us",
-                ]
-                | [
-                    "Only" | "Exactly",
-                    amount,
-                    "of",
-                    "us",
-                    profession,
-                    "has" | "have",
-                    "a" | "an",
-                    "innocent" | "criminal" as verdict,
-                    "directly",
-                    *direction,
-                    "us",
-                ]
-                | [
-                    amount,
-                    "of",
-                    "the",
-                    str(),
-                    profession,
-                    "has" | "have",
-                    "a" | "an",
-                    "innocent" | "criminal" as verdict,
-                    "directly",
-                    *direction,
-                    "them",
-                ]
-                | [
-                    "Only" | "Exactly",
-                    amount,
-                    "of",
-                    "the",
-                    str(),
-                    profession,
-                    "has" | "have",
-                    "a" | "an",
-                    "innocent" | "criminal" as verdict,
-                    "directly",
-                    *direction,
-                    "them",
-                ]
-            ) if (profession_p := parse_profession(profession)) is not None:
-                return RegionClue(
-                    parse_directly_full(direction)(ProfessionRegion(profession_p)),
-                    Exact(Verdict.parse(verdict), parse_num(amount)),
-                )
-
-            case (
-                [
-                    "Exactly" | "Only",
-                    a_amount,
-                    a_profession,
-                    "has",
-                    "exactly" | "only",
-                    b_amount,
-                    "innocent" | "criminal" as b_verdict,
-                    "neighbor" | "neighbors",
-                ]
-                | [
-                    a_amount,
-                    a_profession,
-                    "has",
-                    "exactly" | "only",
-                    b_amount,
-                    "innocent" | "criminal" as b_verdict,
-                    "neighbor" | "neighbors",
-                ]
-                | [
-                    "Exactly" | "Only",
-                    a_amount,
-                    a_profession,
-                    "has",
-                    b_amount,
-                    "innocent" | "criminal" as b_verdict,
-                    "neighbor" | "neighbors",
-                ]
-                | [
-                    a_amount,
-                    a_profession,
-                    "has",
-                    b_amount,
-                    "innocent" | "criminal" as b_verdict,
-                    "neighbor" | "neighbors",
-                ]
-            ) if (a_profession_p := parse_profession(a_profession)) is not None:
-                return OnlyXPeople(
-                    parse_num(a_amount),
-                    ProfessionRegion(a_profession_p),
-                    SimplePersonConstraint(
-                        Neighboring,
-                        Exact(Verdict.parse(b_verdict), parse_num(b_amount)),
-                    ),
-                )
-
-            case [
-                "There",
-                "are",
-                "as",
-                "many",
-                "innocent" | "criminal" as a_verdict,
-                a_profession,
-                "as",
-                "there",
-                "are",
-                "innocent" | "criminal" as b_verdict,
-                b_profession,
-            ] if (a_profession_p := parse_profession(a_profession)) is not None and (
-                b_profession_p := parse_profession(b_profession)
-            ) is not None:
-                return Equal(
-                    ProfessionRegion(a_profession_p),
-                    Verdict.parse(a_verdict),
-                    ProfessionRegion(b_profession_p),
-                    Verdict.parse(b_verdict),
-                )
-
-            case [
-                "There",
-                "is" | "are",
-                *constraint,
-                amount,
-                "innocent" | "criminal" | "innocents" | "criminals" as verdict,
-                "among",
-                "all" | "each",
-                "profession" | "professions",
-            ] | [
-                "There's",
-                *constraint,
-                amount,
-                "innocent" | "criminal" | "innocents" | "criminals" as verdict,
-                "among",
-                "all" | "each",
-                "profession" | "professions",
-            ]:
-                constraint_type: Callable[[Verdict, int], Constraint]
-                match constraint:
-                    case ["at", "least"]:
-                        constraint_type = AtLeast
-                    case ["exactly" | "only"]:
-                        constraint_type = Exact
-                    case _:
-                        msg = (
-                            f"Invalid constraint type: '{constraint}' "
-                            f"in clue: '{clue_s}'"
-                        )
-                        raise ValueError(msg)
-
-                return ForEveryProfession(
-                    constraint_type(Verdict.parse(verdict), parse_num(amount))
-                )
-
-            case [
-                "There",
-                "is" | "are",
-                amount,
-                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
-                *region,
-            ] | [
-                "There",
-                "is" | "are",
-                "exactly" | "only",
-                amount,
-                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
-                *region,
-            ]:
-                return RegionClue(
-                    Region.parse_region(region, me),
-                    Exact(Verdict.parse(verdict), parse_num(amount)),
-                )
-
-            case [
-                "No",
-                "one",
-                *region,
-                "has",
-                "more",
-                "than",
-                amount,
-                "innocent" | "criminal" as verdict,
-                "neighbor" | "neighbors",
-            ]:
-                return OnlyXPeople(
-                    0,
-                    Region.parse_region(region, me),
-                    SimplePersonConstraint(
-                        Neighboring,
-                        AtLeast(Verdict.parse(verdict), parse_num(amount) + 1),
-                    ),
-                )
-
-            case [
-                "Exactly" | "Only",
-                amount,
-                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
-                *region,
-            ] | [
-                amount,
-                "innocent" | "innocents" | "criminal" | "criminals" as verdict,
-                *region,
-            ]:
-                return RegionClue(
-                    Region.parse_region(region, me),
-                    Exact(Verdict.parse(verdict), parse_num(amount)),
-                )
-
-            case _:
-                msg = f"Unknown clue: '{clue_s}'"
-                raise ValueError(msg)
 
 
 @dataclass(frozen=True, init=False)
@@ -1580,21 +441,18 @@ class ConnectedRegionClue(Clue):
 
 @dataclass(frozen=True)
 class OnlyXPeople(Clue):
-    x: int
+    amount: Amount
     region: Region
     constraint: PersonConstraint
 
     def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
-        return PbEq(
-            [
-                (
-                    self.constraint.z3(field, people, person),
-                    1,
-                )
-                for person in self.region.people(field)
-            ],
-            self.x,
-        )
+        return self.amount.pb([
+            (
+                self.constraint.z3(field, people, person),
+                1,
+            )
+            for person in self.region.people(field)
+        ])
 
 
 @dataclass(frozen=True)
@@ -1616,9 +474,12 @@ class PersonConstraint(ABC):
     ) -> BoolRef: ...
 
 
+type PersonalRegion = Callable[[Person], Region]
+
+
 @dataclass(frozen=True)
 class SimplePersonConstraint(PersonConstraint):
-    personal_region: Callable[[Person], Region]
+    personal_region: PersonalRegion
     constraint: Constraint
 
     def z3(
@@ -1631,7 +492,7 @@ class SimplePersonConstraint(PersonConstraint):
 
 @dataclass(frozen=True)
 class ConditionalPersonConstraint(PersonConstraint):
-    personal_region: Callable[[Person], Region]
+    personal_region: PersonalRegion
     constraint: Constraint
     condition: Verdict
 
@@ -1645,14 +506,16 @@ class ConditionalPersonConstraint(PersonConstraint):
 
 
 @dataclass(frozen=True, init=False)
-class OnlyOne(Clue):
+class OnlyX(Clue):
     clues: frozenset[Clue]
+    amount: Amount
 
-    def __init__(self, *clues: Clue) -> None:
+    def __init__(self, clues: Iterable[Clue], amount: Amount) -> None:
         object.__setattr__(self, "clues", frozenset(clues))
+        object.__setattr__(self, "amount", amount)
 
     def z3(self, field: Field, people: Mapping[Person, BoolRef]) -> BoolRef:
-        return PbEq([(clue.z3(field, people), 1) for clue in self.clues], 1)
+        return self.amount.pb([(clue.z3(field, people), 1) for clue in self.clues])
 
 
 @dataclass(frozen=True)

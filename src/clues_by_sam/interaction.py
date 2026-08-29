@@ -14,6 +14,7 @@ from playwright.sync_api import (
 from clues_by_sam.clues import CRIMINAL, INNOCENT, Clue, Known
 from clues_by_sam.game import Field, Person, Profession
 from clues_by_sam.mover import Mover
+from clues_by_sam.parser import parse_clue
 
 
 def run(url: str) -> None:
@@ -110,6 +111,6 @@ def process_card(card: Locator) -> tuple[Person, Profession, list[Known], list[C
     if "has-hint" in classes:
         hint = card.locator(".hint").text_content()
         assert hint is not None
-        clues.append(Clue.parse(hint, person))
+        clues.append(parse_clue(hint, person))
 
     return person, profession, knowns, clues
