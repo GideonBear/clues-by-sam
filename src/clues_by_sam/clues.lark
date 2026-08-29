@@ -6,7 +6,9 @@ clue: person "is" VERDICT                                                       
     // "both" implies there are no others, so this needs to be handled separately
     | "both" VERDICT "s"? region region_2                                                                           -> both_region_region
     | amount VERDICT "s"? region region_2                                                                           -> region_exact_2
+    | _there_is amount VERDICT "s"? region region                                                                   -> region_exact_2
     | amount VERDICT profession_p_region region_2                                                                   -> region_exact_2
+    | _there_is amount VERDICT profession_p_region region                                                           -> region_exact_2
     | _there_is _a PARITY "number of" VERDICT "s" region                                                            -> parity
     | _there_is _a PARITY "number of" VERDICT profession_p_region                                                   -> parity
     | _a PARITY "number of" profession_p_region ("is" | "are") VERDICT                                              -> parity_rev
