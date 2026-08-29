@@ -49,6 +49,7 @@ clue: person "is" VERDICT                                                       
     | person ("has" | "have") "more" VERDICT "than" VERDICT personal_region_s                                                   -> personal_more
     | x_people region ("has" | "have") _a VERDICT personal_singular_region                                                      -> amount_personal_singular_region
     | amount PROFESSION "s"? ("has" | "have") _a VERDICT personal_singular_region                                               -> profession_amount_personal_singular_region
+    | amount "of the" int_discard PROFESSION "s"? ("has" | "have") _a VERDICT personal_singular_region                          -> profession_amount_personal_singular_region
     | amount VERDICT "s"? region ("has" | "have") _a VERDICT personal_singular_region                                           -> amount_personal_singular_region_conditional
     | person "and" person "have" amount VERDICT "neighbor" "s"? "in common"                                                     -> common_neighbors
     | person ("has" | "have") "more" VERDICT "neighbors than" person                                                            -> more_neighbors
