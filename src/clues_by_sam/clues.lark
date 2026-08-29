@@ -23,16 +23,16 @@ clue: person "is" VERDICT                                                       
     | amount "of the" amount VERDICT "s" region ("is" | "are") region                                               -> of_the
     | amount "of the" amount VERDICT profession_p_region ("is" | "are") region                                      -> of_the
     | amount "of the" amount PROFESSION "s" region ("is" | "are") "a"? VERDICT                                      -> of_the_profession
-    | amount "of" person "'s" amount VERDICT "neighbors" "also"? region_2                                           -> of_the_neighbors
+    | amount "of" person "'s" amount VERDICT "neighbor" "s"? "also"? region_2                                       -> of_the_neighbors
     | person_is "one of" amount VERDICT "s" region                                                                  -> is_one_of
     | person_is "one of" amount VERDICT profession_p_region                                                         -> is_one_of
-    | person_is "one of" person "'s" amount VERDICT "neighbors"                                                     -> is_one_of_neighbors
-    | "everyone has" amount VERDICT "neighbors"                                                                     -> everyone_exact_neighbors
-    | person "has" amount VERDICT "neighbors"                                                                       -> exact_neighbors
-    | x_people region ("has" | "have") constraint "neighbors"                                                       -> region_neighbors
-    | amount PROFESSION "s"? ("has" | "have") constraint "neighbors"                                                -> profession_neighbors
+    | person_is "one of" person "'s" amount VERDICT "neighbor" "s"?                                                 -> is_one_of_neighbors
+    | "everyone has" amount VERDICT "neighbor" "s"?                                                                 -> everyone_exact_neighbors
+    | person "has" amount VERDICT "neighbor" "s"?                                                                   -> exact_neighbors
+    | x_people region ("has" | "have") constraint "neighbor" "s"?                                                   -> region_neighbors
+    | amount PROFESSION "s"? ("has" | "have") constraint "neighbor" "s"?                                            -> profession_neighbors
     | person_is "the only" VERDICT region                                                                           -> only_in_region
-    | person "and" person "have an equal number of" VERDICT "neighbors"                                             -> equal_neighbors
+    | person "and" person "have an equal number of" VERDICT "neighbor" "s"?                                         -> equal_neighbors
     | _there_is "an equal number of" VERDICT "s in" region_and_region                                               -> equal_region_and_region
     | _there_is "as many" VERDICT profession_p_region "as there are" VERDICT profession_p_region                    -> equal_verdict_region_and_verdict_region
     | _there_is "an equal number of" ("innocents and criminals" | "criminals and innocents") region                 -> equal_verdicts
