@@ -17,7 +17,7 @@ from clues_by_sam.mover import Mover
 from clues_by_sam.parser import parse_clue
 
 
-def run(url: str) -> None:
+def run(url: str, wait: bool) -> None:  # ruff: ignore[boolean-type-hint-positional-argument]
     with sync_playwright() as p:
         browser = p.firefox.launch(headless=False)
         page = browser.new_page()
@@ -26,7 +26,8 @@ def run(url: str) -> None:
         game, people, knowns, clues = load_game(page)
         play_game(page, game, people, knowns, clues)
 
-        input("Press enter to continue...")
+        if wait:
+            input("Press enter to continue...")
 
         browser.close()
 

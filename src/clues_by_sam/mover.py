@@ -46,4 +46,8 @@ class Mover:
                     return known
                 self.solver.pop()
 
+        if len(self.unknowns):
+            msg = "Cannot find valid move while game is not finished"
+            raise RuntimeError(msg)
+
         return None
