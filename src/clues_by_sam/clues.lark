@@ -1,57 +1,57 @@
 start: clue
 
-clue: person "is" VERDICT                                                                                           -> known
-    | _there_is amount VERDICT "s"? region                                                                          -> region_exact
-    | _there_is amount VERDICT profession_p_region                                                                  -> region_exact
+clue: person "is" VERDICT                                                                                                       -> known
+    | _there_is amount VERDICT "s"? region                                                                                      -> region_exact
+    | _there_is amount VERDICT profession_p_region                                                                              -> region_exact
     // "both" implies there are no others, so this needs to be handled separately
-    | "both" VERDICT "s"? region region_2                                                                           -> both_region_region
-    | amount VERDICT "s"? region region_2                                                                           -> region_exact_2
-    | _there_is amount VERDICT "s"? region region                                                                   -> region_exact_2
-    | amount VERDICT profession_p_region region_2                                                                   -> region_exact_2
-    | _there_is amount VERDICT profession_p_region region                                                           -> region_exact_2
-    | _there_is _a PARITY "number of" VERDICT "s" region                                                            -> parity
-    | _there_is _a PARITY "number of" VERDICT profession_p_region                                                   -> parity
-    | _a PARITY "number of" profession_p_region ("is" | "are") VERDICT                                              -> parity_rev
-    | _a PARITY "number of" VERDICT "s" region region_2                                                             -> parity_2
-    | _a PARITY "number of" VERDICT profession_p_region region_2                                                    -> parity_2
-    | amount ROW_COL_TYPE "has" constraint                                                                          -> x_regions_have_constraint
-    | row_col "is the only" ROW_COL_TYPE "with" constraint                                                          -> one_region_has_constraint
-    | row_col "has more" VERDICT "s" "than any other" ROW_COL_TYPE                                                  -> row_col_more_than_any_other
-    | "each" ROW_COL_TYPE "has" constraint                                                                          -> each_row_col
-    | "all" VERDICT "s" region "are connected"                                                                      -> connected
-    | "both" VERDICT "s" region "are connected"                                                                     -> both_connected
-    | amount "of the" amount VERDICT "s" region ("is" | "are") region                                               -> of_the
-    | amount "of the" amount VERDICT profession_p_region ("is" | "are") region                                      -> of_the
-    | amount "of the" amount PROFESSION "s" region ("is" | "are") "a"? VERDICT                                      -> of_the_profession
-    | amount "of" person "'s" amount VERDICT "neighbor" "s"? "also"? region_2                                       -> of_the_neighbors
-    | person_is "one of" amount VERDICT "s" region                                                                  -> is_one_of
-    | person_is "one of" amount VERDICT profession_p_region                                                         -> is_one_of
-    | person_is "one of" person "'s" amount VERDICT "neighbor" "s"?                                                 -> is_one_of_neighbors
-    | "everyone has" amount VERDICT "neighbor" "s"?                                                                 -> everyone_exact_neighbors
-    | person ("has" | "have") amount VERDICT "neighbor" "s"?                                                                   -> exact_neighbors
-    | x_people region ("has" | "have") constraint "neighbor" "s"?                                                   -> region_neighbors
-    | amount PROFESSION "s"? ("has" | "have") constraint "neighbor" "s"?                                            -> profession_neighbors
-    | person_is "the only" VERDICT region                                                                           -> only_in_region
-    | person "and" person "have an equal number of" VERDICT "neighbor" "s"?                                         -> equal_neighbors
-    | _there_is "an equal number of" VERDICT "s in" region_and_region                                               -> equal_region_and_region
-    | _there_is "as many" VERDICT profession_p_region "as there are" VERDICT profession_p_region                    -> equal_verdict_region_and_verdict_region
-    | _there_is "an equal number of" ("innocents and criminals" | "criminals and innocents") region                 -> equal_verdicts
-    | _there_is "an equal number of" ("innocent and criminal" | "criminal and innocent") profession_p_region        -> equal_verdicts
-    | _there_is "more" VERDICT "s" region "than" (region | row_col)                                                 -> more_verdict_than_region
-    | _there_is "more" VERDICT profession_p_region "than" profession_p_region                                       -> more_verdict_than_region
-    | _there_is "more" VERDICT "s than" VERDICT "s" region                                                          -> more_verdict_than_verdict
-    | _there_is "more" VERDICT "s than" VERDICT profession_p_region                                                 -> more_verdict_than_verdict
-    | _there_is "more" VERDICT "s" region "than" VERDICT "s" region                                                 -> more_verdict_region_than_verdict_region
-    | _there_is "more" VERDICT profession_p_region "than" VERDICT profession_p_region                               -> more_verdict_region_than_verdict_region
-    | person ("has" | "have") "an equal number of" ("innocent and criminal" | "criminal and innocent") personal_region_s         -> personal_equal_verdicts
-    | person ("has" | "have") "an equal number of" ("innocents and criminals" | "criminals and innocents") personal_region_p     -> personal_equal_verdicts
-    | person ("has" | "have") "more" VERDICT "than" VERDICT personal_region_s                                                    -> personal_more
-    | x_people region ("has" | "have") _a VERDICT personal_singular_region                                          -> amount_personal_singular_region
-    | amount PROFESSION "s"? ("has" | "have") _a VERDICT personal_singular_region                                   -> profession_amount_personal_singular_region
-    | amount VERDICT "s"? region ("has" | "have") _a VERDICT personal_singular_region                               -> amount_personal_singular_region_conditional
-    | person "and" person "have" amount VERDICT "neighbor" "s"? "in common"                                         -> common_neighbors
-    | person ("has" | "have") "more" VERDICT "neighbors than" person                                                             -> more_neighbors
-    | _there_is constraint "among" ("all professions" | "each profession")                                          -> among_all_professions
+    | "both" VERDICT "s"? region region_2                                                                                       -> both_region_region
+    | amount VERDICT "s"? region region_2                                                                                       -> region_exact_2
+    | _there_is amount VERDICT "s"? region region                                                                               -> region_exact_2
+    | amount VERDICT profession_p_region region_2                                                                               -> region_exact_2
+    | _there_is amount VERDICT profession_p_region region                                                                       -> region_exact_2
+    | _there_is _a PARITY "number of" VERDICT "s" region                                                                        -> parity
+    | _there_is _a PARITY "number of" VERDICT profession_p_region                                                               -> parity
+    | _a PARITY "number of" profession_p_region ("is" | "are") VERDICT                                                          -> parity_rev
+    | _a PARITY "number of" VERDICT "s" region region_2                                                                         -> parity_2
+    | _a PARITY "number of" VERDICT profession_p_region region_2                                                                -> parity_2
+    | amount ROW_COL_TYPE "has" constraint                                                                                      -> x_regions_have_constraint
+    | row_col "is the only" ROW_COL_TYPE "with" constraint                                                                      -> one_region_has_constraint
+    | row_col "has more" VERDICT "s" "than any other" ROW_COL_TYPE                                                              -> row_col_more_than_any_other
+    | "each" ROW_COL_TYPE "has" constraint                                                                                      -> each_row_col
+    | "all" VERDICT "s" region "are connected"                                                                                  -> connected
+    | "both" VERDICT "s" region "are connected"                                                                                 -> both_connected
+    | amount "of the" amount VERDICT "s" region ("is" | "are") region                                                           -> of_the
+    | amount "of the" amount VERDICT profession_p_region ("is" | "are") region                                                  -> of_the
+    | amount "of the" amount PROFESSION "s" region ("is" | "are") "a"? VERDICT                                                  -> of_the_profession
+    | amount "of" person "'s" amount VERDICT "neighbor" "s"? "also"? region_2                                                   -> of_the_neighbors
+    | person_is "one of" amount VERDICT "s" region                                                                              -> is_one_of
+    | person_is "one of" amount VERDICT profession_p_region                                                                     -> is_one_of
+    | person_is "one of" person "'s" amount VERDICT "neighbor" "s"?                                                             -> is_one_of_neighbors
+    | "everyone has" amount VERDICT "neighbor" "s"?                                                                             -> everyone_exact_neighbors
+    | person ("has" | "have") amount VERDICT "neighbor" "s"?                                                                    -> exact_neighbors
+    | x_people region ("has" | "have") constraint "neighbor" "s"?                                                               -> region_neighbors
+    | amount PROFESSION "s"? ("has" | "have") constraint "neighbor" "s"?                                                        -> profession_neighbors
+    | person_is "the only" VERDICT region                                                                                       -> only_in_region
+    | person "and" person "have an equal number of" VERDICT "neighbor" "s"?                                                     -> equal_neighbors
+    | _there_is "an equal number of" VERDICT "s in" region_and_region                                                           -> equal_region_and_region
+    | _there_is "as many" VERDICT profession_p_region "as there are" VERDICT profession_p_region                                -> equal_verdict_region_and_verdict_region
+    | _there_is "an equal number of" ("innocents and criminals" | "criminals and innocents") region                             -> equal_verdicts
+    | _there_is "an equal number of" ("innocent and criminal" | "criminal and innocent") profession_p_region                    -> equal_verdicts
+    | _there_is "more" VERDICT "s" region "than" (region | row_col)                                                             -> more_verdict_than_region
+    | _there_is "more" VERDICT profession_p_region "than" profession_p_region                                                   -> more_verdict_than_region
+    | _there_is "more" VERDICT "s than" VERDICT "s" region                                                                      -> more_verdict_than_verdict
+    | _there_is "more" VERDICT "s than" VERDICT profession_p_region                                                             -> more_verdict_than_verdict
+    | _there_is "more" VERDICT "s" region "than" VERDICT "s" region                                                             -> more_verdict_region_than_verdict_region
+    | _there_is "more" VERDICT profession_p_region "than" VERDICT profession_p_region                                           -> more_verdict_region_than_verdict_region
+    | person ("has" | "have") "an equal number of" ("innocent and criminal" | "criminal and innocent") personal_region_s        -> personal_equal_verdicts
+    | person ("has" | "have") "an equal number of" ("innocents and criminals" | "criminals and innocents") personal_region_p    -> personal_equal_verdicts
+    | person ("has" | "have") "more" VERDICT "than" VERDICT personal_region_s                                                   -> personal_more
+    | x_people region ("has" | "have") _a VERDICT personal_singular_region                                                      -> amount_personal_singular_region
+    | amount PROFESSION "s"? ("has" | "have") _a VERDICT personal_singular_region                                               -> profession_amount_personal_singular_region
+    | amount VERDICT "s"? region ("has" | "have") _a VERDICT personal_singular_region                                           -> amount_personal_singular_region_conditional
+    | person "and" person "have" amount VERDICT "neighbor" "s"? "in common"                                                     -> common_neighbors
+    | person ("has" | "have") "more" VERDICT "neighbors than" person                                                            -> more_neighbors
+    | _there_is constraint "among" ("all professions" | "each profession")                                                      -> among_all_professions
 
 
 region: "in total"                        -> all
