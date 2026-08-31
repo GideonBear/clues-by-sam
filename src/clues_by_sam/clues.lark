@@ -1,6 +1,6 @@
 start: clue
 
-clue: person "is" VERDICT                                                                                                       -> known
+clue: person "is" _a? VERDICT                                                                                                   -> known
     | _there_is amount VERDICT "s"? region                                                                                      -> region_exact
     | _there_is amount VERDICT profession_p_region                                                                              -> region_exact
     // "both" implies there are no others, so this needs to be handled separately
