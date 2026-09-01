@@ -5,6 +5,8 @@ clue: person "is" _a? VERDICT                                                   
     | _there_is amount VERDICT profession_p_region                                                                              -> region_exact
     // "both" implies there are no others, so this needs to be handled separately
     | "both" VERDICT "s"? region region_2                                                                                       -> both_region_region
+    // "the only" implies there are no others, so this needs to be handled separately
+    | "the only" VERDICT "s"? region region_2                                                                                   -> only_region_region
     | amount VERDICT "s"? region region_2                                                                                       -> region_exact_2
     | _there_is amount VERDICT "s"? region region                                                                               -> region_exact_2
     | amount VERDICT profession_p_region region_2                                                                               -> region_exact_2
