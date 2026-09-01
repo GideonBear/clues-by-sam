@@ -13,6 +13,7 @@ clue: person "is" _a? VERDICT                                                   
     | _there_is _a PARITY "number of" VERDICT profession_p_region                                                               -> parity
     | _a PARITY "number of" profession_p_region ("is" | "are") VERDICT                                                          -> parity_rev
     | _a PARITY "number of" VERDICT "s" region region_2                                                                         -> parity_2
+    | _there_is _a PARITY "number of" VERDICT "s" region region                                                                 -> parity_2
     | _a PARITY "number of" VERDICT profession_p_region region_2                                                                -> parity_2
     | amount ROW_COL_TYPE "has" constraint                                                                                      -> x_regions_have_constraint
     | row_col "is the only" ROW_COL_TYPE "with" constraint                                                                      -> one_region_has_constraint
