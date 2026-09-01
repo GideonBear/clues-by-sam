@@ -136,8 +136,12 @@ class Between(ConnectedRegion):
         ai, aj = field.find(self.a)
         bi, bj = field.find(self.b)
         if ai == bi:
+            if aj > bj:
+                aj, bj = bj, aj
             return field[ai][aj + 1 : bj]
         if aj == bj:
+            if ai > bi:
+                ai, bi = bi, ai
             return field.column(aj)[ai + 1 : bi]
 
         msg = (
