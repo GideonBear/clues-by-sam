@@ -2,7 +2,7 @@ start: clue
 
 clue: person "is" _a? VERDICT                                                                                                   -> known
     | _there_is amount VERDICT "s"? region                                                                                      -> region_exact
-    | _there_is amount VERDICT profession_p_region                                                                              -> region_exact
+    | _there_is amount VERDICT profession_region                                                                                -> region_exact
     // "both" implies there are no others, so this needs to be handled separately
     | "both" VERDICT "s"? region region_2                                                                                       -> both_region_region
     // "the only" implies there are no others, so this needs to be handled separately
@@ -127,6 +127,9 @@ person_2: "my" -> me
 person_is: person "is"
          | "I'm"    -> me
          | "I am"   -> me
+
+profession_region: profession_p
+                 | PROFESSION
 
 profession_p_region: profession_p
 
