@@ -26,10 +26,10 @@ clue: person "is" _a? VERDICT                                                   
     | amount "of the" amount VERDICT "s" region ("is" | "are") region                                                           -> of_the
     | amount "of the" amount VERDICT profession_p_region ("is" | "are") region                                                  -> of_the
     | amount "of the" amount PROFESSION "s" region ("is" | "are") "a"? VERDICT                                                  -> of_the_profession
-    | amount "of" person "'s" amount VERDICT "neighbor" "s"? "also"? region_2                                                   -> of_the_neighbors
+    | amount "of" person_2 amount VERDICT "neighbor" "s"? "also"? region_2                                                      -> of_the_neighbors
     | person_is "one of" amount VERDICT "s" region                                                                              -> is_one_of
     | person_is "one of" amount VERDICT profession_p_region                                                                     -> is_one_of
-    | person_is "one of" person "'s" amount VERDICT "neighbor" "s"?                                                             -> is_one_of_neighbors
+    | person_is "one of" person_2 amount VERDICT "neighbor" "s"?                                                                -> is_one_of_neighbors
     | "everyone has" amount VERDICT "neighbor" "s"?                                                                             -> everyone_exact_neighbors
     | person "has" amount VERDICT "neighbor" "s"?                                                                               -> exact_neighbors
     | person "has" amount VERDICT "neighbor" "s"? region                                                                        -> exact_neighbors_region
@@ -70,7 +70,7 @@ region: "in total"                        -> all
       | "to the right of" person          -> right
       | "in between" person "and" person  -> between
       | "neighboring" person              -> neighboring
-      | person "'s neighbor" "s"?         -> neighboring
+      | person_2 "neighbor" "s"?          -> neighboring
 
 region_2: ("are" | "is") region
         | "neighbor" person         -> neighboring
@@ -120,10 +120,12 @@ _there_is: "there is"
 
 person: "me" -> me
       | "I" -> me
-      | /(?-i:[A-Z][a-z]*)/
+      | PERSON_NAME
 
 person_2: "my" -> me
-        | /(?-i:[A-Z][a-z]*)'s/
+        | PERSON_NAME "'s"
+
+PERSON_NAME: /(?-i:[A-Z][a-z]*)/
 
 person_is: person "is"
          | "I'm"    -> me
