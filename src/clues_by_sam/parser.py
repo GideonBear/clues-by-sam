@@ -264,6 +264,10 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
         person, amount, verdict = c
         return RegionClue(Neighboring(person), Count(verdict, amount))
 
+    def exact_neighbors_region(self, c: tuple[Person, Amount, Verdict, Region]) -> Clue:
+        person, amount, verdict, region = c
+        return RegionClue(Overlap(Neighboring(person), region), Count(verdict, amount))
+
     def region_neighbors(self, c: tuple[Amount, Region, Constraint]) -> Clue:
         amount_a, region, constraint = c
         return OnlyXPeople(
