@@ -239,6 +239,10 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
             ),
         )
 
+    def of_the_neighbors_2(self, c: tuple[Amount, Person, Region, Verdict]) -> Clue:
+        amount, person, region, verdict = c
+        return RegionClue(Overlap(Neighboring(person), region), Count(verdict, amount))
+
     def is_one_of(self, c: tuple[Person, Amount, Verdict, Region]) -> Clue:
         person, amount, verdict, region = c
         return Combined(

@@ -27,6 +27,7 @@ clue: person "is" _a? VERDICT                                                   
     | amount "of the" amount VERDICT profession_p_region ("is" | "are") region                                                  -> of_the
     | amount "of the" amount PROFESSION "s" region ("is" | "are") "a"? VERDICT                                                  -> of_the_profession
     | amount "of" person_2 amount VERDICT "neighbor" "s"? "also"? region_2                                                      -> of_the_neighbors
+    | amount "of" person_2 "neighbors" region "are" VERDICT                                                                     -> of_the_neighbors_2
     | person_is "one of" amount VERDICT "s" region                                                                              -> is_one_of
     | person_is "one of" amount VERDICT profession_p_region                                                                     -> is_one_of
     | person_is "one of" person_2 amount VERDICT "neighbor" "s"?                                                                -> is_one_of_neighbors
