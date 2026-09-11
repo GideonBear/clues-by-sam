@@ -155,6 +155,7 @@ PROFESSION: "coder"
           | "farmer"
           | "cook"
           | "doctor"
+          | "scientist"
 
 NUMBER: INT
       | "no"
