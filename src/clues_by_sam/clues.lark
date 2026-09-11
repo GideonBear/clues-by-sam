@@ -38,7 +38,7 @@ clue: person "is" _a? VERDICT                                                   
     | person ("has" | "have") amount VERDICT "neighbor" "s"?                                                                    -> exact_neighbors
     | person ("has" | "have") amount VERDICT "neighbor" "s"? region                                                             -> exact_neighbors_region
     | x_people region ("has" | "have") constraint "neighbor" "s"?                                                               -> region_neighbors
-    | amount PROFESSION "s"? ("has" | "have") constraint "neighbor" "s"?                                                        -> profession_neighbors
+    | amount (profession_s | profession_p) ("has" | "have") constraint "neighbor" "s"?                                          -> profession_neighbors
     | person_is "the only" VERDICT region                                                                                       -> only_in_region
     | person_is "the only" ("person" | "one") "with" constraint "neighbor" "s"?                                                 -> only_with_neighbors
     | person "and" person "have an equal number of" VERDICT "neighbor" "s"?                                                     -> equal_neighbors
@@ -56,7 +56,7 @@ clue: person "is" _a? VERDICT                                                   
     | person ("has" | "have") "an equal number of" ("innocents and criminals" | "criminals and innocents") personal_region_p    -> personal_equal_verdicts
     | person ("has" | "have") "more" VERDICT "than" VERDICT personal_region_s                                                   -> personal_more
     | x_people region ("has" | "have") _a VERDICT personal_singular_region                                                      -> amount_personal_singular_region
-    | amount PROFESSION "s"? ("has" | "have") _a VERDICT personal_singular_region                                               -> profession_amount_personal_singular_region
+    | amount (profession_s | profession_p) ("has" | "have") _a VERDICT personal_singular_region                                 -> profession_amount_personal_singular_region
     | amount "of the" int_discard? PROFESSION "s"? ("has" | "have") _a VERDICT personal_singular_region                         -> profession_amount_personal_singular_region
     | amount "of the" int_discard? PROFESSION "s"? ("has" | "have") amount VERDICT personal_region_s                            -> profession_amount_personal_singular_region_amount
     | amount VERDICT "s"? region ("has" | "have") _a VERDICT personal_singular_region                                           -> amount_personal_singular_region_conditional
@@ -147,6 +147,9 @@ profession_region: profession_p
                  | PROFESSION
 
 profession_p_region: profession_p
+
+profession_s: PROFESSION
+            | "of us" int_discard? PROFESSION "s"
 
 profession_p: PROFESSION "s"
             | "us" int_discard? PROFESSION "s"

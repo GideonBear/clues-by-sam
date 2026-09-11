@@ -633,6 +633,10 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
         (profession,) = c
         return ProfessionRegion(profession)
 
+    def profession_s(self, c: tuple[Profession]) -> Profession:
+        (profession,) = c
+        return profession
+
     def profession_p(self, c: tuple[Profession]) -> Profession:
         (profession,) = c
         return profession
