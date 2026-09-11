@@ -489,6 +489,10 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
         (person,) = c
         return Neighboring(person)
 
+    def region(self, c: tuple[Region]) -> Region:
+        (region,) = c
+        return region
+
     def region_2(self, c: tuple[Region]) -> Region:
         (region,) = c
         return region
