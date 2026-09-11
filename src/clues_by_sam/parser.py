@@ -145,6 +145,10 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
         parity, verdict, region, region_2 = c
         return RegionClue(Overlap(region, region_2), Count(verdict, parity))
 
+    def parity_2_rev(self, c: tuple[Parity, Region, Region, Verdict]) -> Clue:
+        parity, region, region_2, verdict = c
+        return self.parity_2((parity, verdict, region, region_2))
+
     def x_regions_have_constraint(
         self,
         c: tuple[Amount, type[Row | Column], Constraint],

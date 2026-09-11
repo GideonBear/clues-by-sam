@@ -15,6 +15,8 @@ clue: person "is" _a? VERDICT                                                   
     | _there_is _a PARITY "number of" VERDICT "s" region                                                                        -> parity
     | _there_is _a PARITY "number of" VERDICT profession_p_region                                                               -> parity
     | _a PARITY "number of" profession_p_region ("is" | "are") VERDICT                                                          -> parity_rev
+    | _a PARITY "number of" region_3 ("is" | "are") VERDICT                                                                     -> parity_rev
+    | _a PARITY "number of" region_3 region ("is" | "are") VERDICT                                                              -> parity_2_rev
     | _a PARITY "number of" VERDICT "s" region region_2                                                                         -> parity_2
     | _there_is _a PARITY "number of" VERDICT "s" region region                                                                 -> parity_2
     | _a PARITY "number of" VERDICT profession_p_region region_2                                                                -> parity_2
@@ -78,6 +80,8 @@ region: "in total"                        -> all
 region_2: ("are" | "is") region
         | "neighbor" person         -> neighboring
         | "is neighboring" person   -> neighboring
+
+region_3: person_2 "neighbors"  -> neighboring
 
 region_and_region: region "and" region
                  | "rows"    ROW    "and" ROW       -> row_and_row
