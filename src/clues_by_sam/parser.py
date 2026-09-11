@@ -392,6 +392,16 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
             personal_region,
         ))
 
+    def profession_amount_personal_singular_region_amount(
+        self, c: tuple[Amount, Profession, Amount, Verdict, PersonalRegion]
+    ) -> Clue:
+        amount, profession, verdict_amount, verdict, personal_region = c
+        return OnlyXPeople(
+            amount,
+            ProfessionRegion(profession),
+            SimplePersonConstraint(personal_region, Count(verdict, verdict_amount)),
+        )
+
     def amount_personal_singular_region_conditional(
         self, c: tuple[Amount, Verdict, Region, Verdict, PersonalRegion]
     ) -> Clue:
