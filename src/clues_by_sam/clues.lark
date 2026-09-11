@@ -159,6 +159,7 @@ PROFESSION: "coder"
 
 NUMBER: INT
       | "no"
+      | "neither"
       | "both"
       | "zero"
       | "one"
