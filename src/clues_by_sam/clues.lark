@@ -66,6 +66,8 @@ clue: person "is" _a? VERDICT                                                   
 
 
 region: "in total"                        -> all
+      // By some miracle this doesn't mess anything up
+      |                                   -> all
       | "on the edges"                    -> edges
       | "in" ("a corner" | "the corners") -> corners
       | "in" row_col                      -> row_col_region
