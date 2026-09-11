@@ -225,6 +225,18 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
             ),
         )
 
+    def of_the_is_profession(
+        self, c: tuple[Amount, Amount, Verdict, Region, Profession]
+    ) -> Clue:
+        spec_amount, total_amount, verdict, total_region, profession = c
+        return self.of_the((
+            spec_amount,
+            total_amount,
+            verdict,
+            total_region,
+            ProfessionRegion(profession),
+        ))
+
     def of_the_profession(
         self, c: tuple[Amount, Amount, Profession, Region, Verdict]
     ) -> Clue:
@@ -634,6 +646,10 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
         return ProfessionRegion(profession)
 
     def profession_s(self, c: tuple[Profession]) -> Profession:
+        (profession,) = c
+        return profession
+
+    def profession_s_2(self, c: tuple[Profession]) -> Profession:
         (profession,) = c
         return profession
 

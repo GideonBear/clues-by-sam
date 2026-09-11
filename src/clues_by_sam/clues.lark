@@ -27,6 +27,7 @@ clue: person "is" _a? VERDICT                                                   
     | "all" VERDICT "s" region "are connected"                                                                                  -> connected
     | "both" VERDICT "s" region "are connected"                                                                                 -> both_connected
     | amount "of the" amount VERDICT "s" region ("is" | "are") region                                                           -> of_the
+    | amount "of the" amount VERDICT "s" region ("is" | "are") (profession_s_2 | profession_p)                                  -> of_the_is_profession
     | amount "of the" amount VERDICT profession_p_region ("is" | "are") region                                                  -> of_the
     | amount "of the" amount PROFESSION "s" region ("is" | "are") "a"? VERDICT                                                  -> of_the_profession
     | amount "of" person_2 amount VERDICT "neighbor" "s"? "also"? region_2                                                      -> of_the_neighbors
@@ -150,6 +151,9 @@ profession_p_region: profession_p
 
 profession_s: PROFESSION
             | "of us" int_discard? PROFESSION "s"
+
+profession_s_2: "a" PROFESSION
+              | "one of us" int_discard? PROFESSION "s"
 
 profession_p: PROFESSION "s"
             | "us" int_discard? PROFESSION "s"
