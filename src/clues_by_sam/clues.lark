@@ -125,8 +125,10 @@ person: "me" -> me
 
 person_2: "my" -> me
         | PERSON_NAME "'s"
+        | PERSON_NAME_ENDS_WITH_S "'"
 
 PERSON_NAME: /(?-i:[A-Z][a-z]*)/
+PERSON_NAME_ENDS_WITH_S: /(?-i:[A-Z][a-z]*)s/
 
 person_is: person "is"
          | "I'm"    -> me
