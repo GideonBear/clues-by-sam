@@ -105,6 +105,10 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
         amount, verdict, region = c
         return RegionClue(region, Count(verdict, amount))
 
+    def region_exact_rev(self, c: tuple[Amount, Region, Verdict]) -> Clue:
+        amount, region, verdict = c
+        return self.region_exact((amount, verdict, region))
+
     def region_exact_2(self, c: tuple[Amount, Verdict, Region, Region]) -> Clue:
         amount, verdict, region_a, region_b = c
         return RegionClue(Overlap(region_a, region_b), Count(verdict, amount))
