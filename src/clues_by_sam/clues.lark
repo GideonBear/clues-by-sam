@@ -3,7 +3,7 @@ start: clue
 clue: person "is" _a? VERDICT                                                                                                   -> known
     | _there_is amount VERDICT "s"? region                                                                                      -> region_exact
     | _there_is amount VERDICT profession_region                                                                                -> region_exact
-    | amount profession_p_region "are" VERDICT                                                                                  -> region_exact_rev
+    | amount profession_p_region ("is" | "are") VERDICT                                                                         -> region_exact_rev
     // "both" implies there are no others, so this needs to be handled separately
     | "both" VERDICT "s"? region region_2                                                                                       -> both_region_region
     // "the only" implies there are no others, so this needs to be handled separately
@@ -31,7 +31,7 @@ clue: person "is" _a? VERDICT                                                   
     | amount "of the" amount VERDICT profession_p_region ("is" | "are") region                                                  -> of_the
     | amount "of the" amount PROFESSION "s" region ("is" | "are") "a"? VERDICT                                                  -> of_the_profession
     | amount "of" person_2 amount VERDICT "neighbor" "s"? "also"? region_2                                                      -> of_the_neighbors
-    | amount "of" person_2 "neighbors" region "are" VERDICT                                                                     -> of_the_neighbors_2
+    | amount "of" person_2 "neighbors" region ("is" | "are") VERDICT                                                            -> of_the_neighbors_2
     | person_is "one of" amount VERDICT "s" region                                                                              -> is_one_of
     | person_is "one of" amount VERDICT profession_p_region                                                                     -> is_one_of
     | person_is "one of" person_2 amount VERDICT "neighbor" "s"?                                                                -> is_one_of_neighbors
