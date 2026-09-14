@@ -38,6 +38,7 @@ clue: person "is" _a? VERDICT                                                   
     | "everyone has" amount VERDICT "neighbor" "s"?                                                                             -> everyone_exact_neighbors
     | person ("has" | "have") amount VERDICT "neighbor" "s"?                                                                    -> exact_neighbors
     | person ("has" | "have") amount VERDICT "neighbor" "s"? region                                                             -> exact_neighbors_region
+    | person "and" person "have" amount VERDICT "neighbor" "s"? region                                                          -> two_people_exact_neighbors_region
     | x_people region ("has" | "have") constraint "neighbor" "s"?                                                               -> region_neighbors
     | amount (profession_s | profession_p) ("has" | "have") constraint "neighbor" "s"?                                          -> profession_neighbors
     | person_is "the only" VERDICT region                                                                                       -> only_in_region

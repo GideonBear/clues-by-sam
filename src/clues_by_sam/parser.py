@@ -54,6 +54,7 @@ from clues_by_sam.clues import (
     RowOf,
     SimplePersonConstraint,
     SinglePerson,
+    Union,
     Verdict,
 )
 from clues_by_sam.game import COLUMNS, ROWS, Person, Profession
@@ -293,6 +294,15 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
     def exact_neighbors_region(self, c: tuple[Person, Amount, Verdict, Region]) -> Clue:
         person, amount, verdict, region = c
         return RegionClue(Overlap(Neighboring(person), region), Count(verdict, amount))
+
+    def two_people_exact_neighbors_region(
+        self, c: tuple[Person, Person, Amount, Verdict, Region]
+    ) -> Clue:
+        person_a, person_b, amount, verdict, region = c
+        return RegionClue(
+            Overlap(Union(Neighboring(person_a), Neighboring(person_b)), region),
+            Count(verdict, amount),
+        )
 
     def region_neighbors(self, c: tuple[Amount, Region, Constraint]) -> Clue:
         amount_a, region, constraint = c

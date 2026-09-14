@@ -62,6 +62,20 @@ class Overlap(Region):
         return a
 
 
+@dataclass(frozen=True, init=False)
+class Union(Region):
+    regions: frozenset[Region]
+
+    def __init__(self, *regions: Region) -> None:
+        object.__setattr__(self, "regions", frozenset(regions))
+
+    def people(self, field: Field) -> Iterable[Person]:
+        a: set[Person] = reduce(
+            set.union, (set(region.people(field)) for region in self.regions)
+        )
+        return a
+
+
 @dataclass(frozen=True)
 class AllExcept(Region):
     exception: Region
