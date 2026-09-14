@@ -47,6 +47,7 @@ clue: person "is" _a? VERDICT                                                   
     | _there_is "an equal number of" VERDICT "s in" region_and_region                                                           -> equal_region_and_region
     | _there_is "as many" VERDICT profession_p_region "as there are" VERDICT profession_p_region                                -> equal_verdict_region_and_verdict_region
     | _there_is "an equal number of" ("innocents and criminals" | "criminals and innocents") region                             -> equal_verdicts
+    | _there_is "as many" ("innocents as criminals" | "criminals as innocents") region                                          -> equal_verdicts
     | _there_is "an equal number of" ("innocent and criminal" | "criminal and innocent") profession_p_region                    -> equal_verdicts
     | _there_is "more" VERDICT "s" region "than" (region | row_col)                                                             -> more_verdict_than_region
     | _there_is "more" VERDICT profession_p_region "than" profession_p_region                                                   -> more_verdict_than_region
