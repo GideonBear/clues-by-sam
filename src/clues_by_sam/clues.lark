@@ -104,10 +104,10 @@ personal_region_p: "above" ("them" | "us")                    -> personal_above
                  | "neighboring" ("them" | "us")              -> personal_neighboring
                  | personal_singular_region
 
-personal_singular_region: "directly above them"             -> personal_directly_above
-                        | "directly below them"             -> personal_directly_below
-                        | "directly to the left of them"    -> personal_directly_left
-                        | "directly to the right of them"   -> personal_directly_right
+personal_singular_region: "directly above" ("them" | "us")              -> personal_directly_above
+                        | "directly below" ("them" | "us")              -> personal_directly_below
+                        | "directly to the left of" ("them" | "us")     -> personal_directly_left
+                        | "directly to the right of" ("them" | "us")    -> personal_directly_right
 
 row_col: "row" ROW         -> row
        | "column" COLUMN   -> col
