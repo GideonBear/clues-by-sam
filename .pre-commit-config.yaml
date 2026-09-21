@@ -127,7 +127,7 @@ repos:
         pass_filenames: false # Check all files to be thorough
         args: [.] # Removes default `--ignore-missing-imports`
         additional_dependencies:
-          - playwright==1.62.0
+          - playwright==1.63.0
           - lark==1.3.1
 
   - repo: https://github.com/tox-dev/pyproject-fmt
