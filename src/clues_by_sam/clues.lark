@@ -177,6 +177,7 @@ PROFESSION: "coder"
           | "doctor"
           | "scientist"
           | "pig"
+          | "worm"
 
 NUMBER: INT
       | "no"
