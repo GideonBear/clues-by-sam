@@ -26,9 +26,9 @@ clue: person "is" _a? VERDICT                                                   
     | "each" ROW_COL_TYPE "has" constraint                                                                                      -> each_row_col
     | "all" VERDICT "s" region "are connected"                                                                                  -> connected
     | "both" VERDICT "s" region "are connected"                                                                                 -> both_connected
-    | amount "of the" amount VERDICT "s" region ("is" | "are") region                                                           -> of_the
+    | amount "of the" amount VERDICT "s" region region_2                                                                        -> of_the
     | amount "of the" amount VERDICT "s" region ("is" | "are") (profession_s_2 | profession_p)                                  -> of_the_is_profession
-    | amount "of the" amount VERDICT profession_p_region ("is" | "are") region                                                  -> of_the
+    | amount "of the" amount VERDICT profession_p_region region_2                                                               -> of_the
     | amount "of the" amount PROFESSION "s" region ("is" | "are") "a"? VERDICT                                                  -> of_the_profession
     | amount "of" person_2 amount VERDICT "neighbor" "s"? "also"? region_2                                                      -> of_the_neighbors
     | amount "of" person_2 "neighbors" region ("is" | "are") VERDICT                                                            -> of_the_neighbors_2
