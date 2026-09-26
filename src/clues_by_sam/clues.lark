@@ -85,7 +85,6 @@ region: "in total"                        -> all
 
 region_2: ("are" | "is") region
         | "neighbor" person         -> neighboring
-        | "is neighboring" person   -> neighboring
 
 region_3: person_2 "neighbors"  -> neighboring
 
