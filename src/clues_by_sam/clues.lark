@@ -181,6 +181,7 @@ PROFESSION: "coder"
 NUMBER: INT
       | "no"
       | "neither"
+      | "none of the"
       | "both"
       | "zero"
       | "one"
