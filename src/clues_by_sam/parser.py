@@ -61,6 +61,8 @@ from clues_by_sam.game import COLUMNS, ROWS, Person, Profession
 
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from lark.visitors import _DiscardType
 
 
@@ -115,8 +117,14 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
         amount, verdict, region_a, region_b = c
         return RegionClue(Overlap(region_a, region_b), Count(verdict, amount))
 
-    def both_region_region(self, c: tuple[Verdict, Region, Region]) -> Clue:
-        verdict, region_a, region_b = c
+    def region_exact_2_2(
+        self, c: tuple[Amount, Verdict, tuple[Region, Region]]
+    ) -> Clue:
+        amount, verdict, (region_a, region_b) = c
+        return self.region_exact_2((amount, verdict, region_a, region_b))
+
+    def both_region_region(self, c: tuple[Verdict, tuple[Region, Region]]) -> Clue:
+        verdict, (region_a, region_b) = c
         return Combined(
             RegionClue(region_a, Count(verdict, Exact(2))),
             RegionClue(
@@ -125,8 +133,8 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
             ),
         )
 
-    def only_region_region(self, c: tuple[Verdict, Region, Region]) -> Clue:
-        verdict, region_a, region_b = c
+    def only_region_region(self, c: tuple[Verdict, tuple[Region, Region]]) -> Clue:
+        verdict, (region_a, region_b) = c
         return Combined(
             RegionClue(region_a, Count(verdict, Exact(1))),
             RegionClue(
@@ -146,6 +154,10 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
     def parity_2(self, c: tuple[Parity, Verdict, Region, Region]) -> Clue:
         parity, verdict, region, region_2 = c
         return RegionClue(Overlap(region, region_2), Count(verdict, parity))
+
+    def parity_2_2(self, c: tuple[Parity, Verdict, tuple[Region, Region]]) -> Clue:
+        parity, verdict, (region, region_2) = c
+        return self.parity_2((parity, verdict, region, region_2))
 
     def parity_2_rev(self, c: tuple[Parity, Region, Region, Verdict]) -> Clue:
         parity, region, region_2, verdict = c
@@ -226,6 +238,18 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
                 Count(verdict, spec_amount),
             ),
         )
+
+    def of_the_2(
+        self, c: tuple[Amount, Amount, Verdict, tuple[Region, Region]]
+    ) -> Clue:
+        spec_amount, total_amount, verdict, (total_region, spec_region) = c
+        return self.of_the((
+            spec_amount,
+            total_amount,
+            verdict,
+            total_region,
+            spec_region,
+        ))
 
     def of_the_is_profession(
         self, c: tuple[Amount, Amount, Verdict, Region, Profession]
@@ -470,6 +494,18 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
         (constraint,) = c
         return ForEveryProfession(constraint)
 
+    # region_region_2
+
+    def region_region_2(self, c: tuple[Region, Region]) -> tuple[Region, Region]:
+        region_a, region_b = c
+        return region_a, region_b
+
+    def neighboring_and_ref(
+        self, c: tuple[Person, Callable[[Person], Region]]
+    ) -> tuple[Region, Region]:
+        person, region_ref = c
+        return Neighboring(person), region_ref(person)
+
     # region / region_2
 
     def all(self, c: tuple[()]) -> Region:
@@ -519,6 +555,46 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
     def region_2(self, c: tuple[Region]) -> Region:
         (region,) = c
         return region
+
+    # region_ref / region_2_ref
+
+    def above_ref(self, c: tuple[()]) -> Callable[[Person], Region]:
+        () = c
+        return Above
+
+    def below_ref(self, c: tuple[()]) -> Callable[[Person], Region]:
+        () = c
+        return Below
+
+    def left_ref(self, c: tuple[()]) -> Callable[[Person], Region]:
+        () = c
+        return Left
+
+    def right_ref(self, c: tuple[()]) -> Callable[[Person], Region]:
+        () = c
+        return Right
+
+    def row_ref(self, c: tuple[()]) -> Callable[[Person], Region]:
+        () = c
+        return RowOf
+
+    def col_ref(self, c: tuple[()]) -> Callable[[Person], Region]:
+        () = c
+        return ColumnOf
+
+    def between_ref(self, c: tuple[Person]) -> Callable[[Person], Region]:
+        (person_a,) = c
+        return lambda person_b: Between(person_a, person_b)
+
+    def neighboring_ref(self, c: tuple[()]) -> Callable[[Person], Region]:
+        () = c
+        return Neighboring
+
+    def region_2_ref(
+        self, c: tuple[Callable[[Person], Region]]
+    ) -> Callable[[Person], Region]:
+        (region_ref,) = c
+        return region_ref
 
     # region_and_region
 

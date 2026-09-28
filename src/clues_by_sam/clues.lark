@@ -5,10 +5,10 @@ clue: person "is" _a? VERDICT                                                   
     | _there_is amount VERDICT profession_region                                                                                -> region_exact
     | amount profession_p_region ("is" | "are") VERDICT                                                                         -> region_exact_rev
     // "both" implies there are no others, so this needs to be handled separately
-    | "both" VERDICT "s"? region region_2                                                                                       -> both_region_region
+    | "both" VERDICT "s"? region_region_2                                                                                       -> both_region_region
     // "the only" implies there are no others, so this needs to be handled separately
-    | "the only" VERDICT "s"? region region_2                                                                                   -> only_region_region
-    | amount VERDICT "s"? region region_2                                                                                       -> region_exact_2
+    | "the only" VERDICT "s"? region_region_2                                                                                   -> only_region_region
+    | amount VERDICT "s"? region_region_2                                                                                       -> region_exact_2_2
     | _there_is amount VERDICT "s"? region region                                                                               -> region_exact_2
     | amount VERDICT profession_p_region region_2                                                                               -> region_exact_2
     | _there_is amount VERDICT profession_p_region region                                                                       -> region_exact_2
@@ -17,7 +17,7 @@ clue: person "is" _a? VERDICT                                                   
     | _a PARITY "number of" profession_p_region ("is" | "are") VERDICT                                                          -> parity_rev
     | _a PARITY "number of" region_3 ("is" | "are") VERDICT                                                                     -> parity_rev
     | _a PARITY "number of" region_3 region ("is" | "are") VERDICT                                                              -> parity_2_rev
-    | _a PARITY "number of" VERDICT "s" region region_2                                                                         -> parity_2
+    | _a PARITY "number of" VERDICT "s" region_region_2                                                                         -> parity_2_2
     | _there_is _a PARITY "number of" VERDICT "s" region region                                                                 -> parity_2
     | _a PARITY "number of" VERDICT profession_p_region region_2                                                                -> parity_2
     | amount ROW_COL_TYPE "has" constraint                                                                                      -> x_regions_have_constraint
@@ -26,7 +26,7 @@ clue: person "is" _a? VERDICT                                                   
     | "each" ROW_COL_TYPE "has" constraint                                                                                      -> each_row_col
     | "all" VERDICT "s" region "are connected"                                                                                  -> connected
     | "both" VERDICT "s" region "are connected"                                                                                 -> both_connected
-    | amount "of the" amount VERDICT "s" region region_2                                                                        -> of_the
+    | amount "of the" amount VERDICT "s" region_region_2                                                                        -> of_the_2
     | amount "of the" amount VERDICT "s" region ("is" | "are") (profession_s_2 | profession_p)                                  -> of_the_is_profession
     | amount "of the" amount VERDICT profession_p_region region_2                                                               -> of_the
     | amount "of the" amount PROFESSION "s" region ("is" | "are") "a"? VERDICT                                                  -> of_the_profession
@@ -68,6 +68,9 @@ clue: person "is" _a? VERDICT                                                   
     | _there_is constraint "among" ("all professions" | "each profession")                                                      -> among_all_professions
 
 
+region_region_2: region region_2
+               | "neighboring" person region_2_ref  -> neighboring_and_ref
+
 region: "in total"                        -> all
       // By some miracle this doesn't mess anything up
       |                                   -> all
@@ -85,6 +88,19 @@ region: "in total"                        -> all
 
 region_2: ("are" | "is") region
         | "neighbor" person         -> neighboring
+
+region_ref: "above" ("him" | "her" | "them")                    -> above_ref
+          | "below" ("him" | "her" | "them")                    -> below_ref
+          | "to the left of" ("him" | "her" | "them")           -> left_ref
+          | "to the right of" ("him" | "her" | "them")          -> right_ref
+          | "in" ("his" | "her" | "their") "row"                -> row_ref
+          | "in" ("his" | "her" | "their") "column"             -> col_ref
+          | "in between" ("him" | "her" | "them") "and" person  -> between_ref
+          | "in between" person "and" ("him" | "her" | "them")  -> between_ref
+          | "neighboring" ("him" | "her" | "them")              -> neighboring_ref
+
+region_2_ref: ("are" | "is") region_ref
+            | "neighbor them"           -> neighboring_ref
 
 region_3: person_2 "neighbors"  -> neighboring
 
