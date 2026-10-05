@@ -172,8 +172,7 @@ profession_s: PROFESSION
 profession_s_2: "a" PROFESSION
               | "one of us" int_discard? PROFESSION "s"
 
-profession_p: PROFESSION "s"
-            | "us" int_discard? PROFESSION "s"
+profession_p: "us"? int_discard? PROFESSION "s"
 
 PROFESSION: "coder"
           | "painter"
