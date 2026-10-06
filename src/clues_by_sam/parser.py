@@ -305,10 +305,10 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
             RegionClue(Neighboring(person_b), Count(verdict, amount)),
         )
 
-    def everyone_exact_neighbors(self, c: tuple[Amount, Verdict]) -> Clue:
-        amount, verdict = c
+    def everyone_exact_neighbors(self, c: tuple[Region, Amount, Verdict]) -> Clue:
+        region, amount, verdict = c
         return ForEvery(
-            All(),
+            region,
             SimplePersonConstraint(Neighboring, Count(verdict, amount)),
         )
 
