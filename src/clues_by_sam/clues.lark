@@ -4,6 +4,7 @@ clue: person "is" _a? VERDICT                                                   
     | _there_is amount VERDICT "s"? region                                                                                      -> region_exact
     | _there_is amount VERDICT profession_region                                                                                -> region_exact
     | amount profession_p_region ("is" | "are") VERDICT                                                                         -> region_exact_rev
+    | _there_is "a total of" amount VERDICT profession_p_region "and" profession_p_region                                       -> region_exact_union
     // "both" implies there are no others, so this needs to be handled separately
     | "both" VERDICT "s"? region_region_2                                                                                       -> both_region_region
     // "the only" implies there are no others, so this needs to be handled separately
