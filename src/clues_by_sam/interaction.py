@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+from time import sleep
 
 from playwright.sync_api import (
     Locator,
@@ -77,15 +78,23 @@ def play_game(
         card.click()
 
         if move.verdict == INNOCENT:
-            page.locator(".btn-innocent").click()
+            button = page.locator(".btn-innocent")
         else:
-            page.locator(".btn-criminal").click()
+            button = page.locator(".btn-criminal")
+
+        button.click()
+        # On daily puzzles (not in the archive, yet?) there's protection against
+        #  clicking the button accidentally (as a double-click on an unflipped card for
+        #  example). Clicking twice is possible to bypass waiting but still needs a
+        #  short delay.
+        sleep(0.15)
+        button.click()
 
         card_person, _card_profession, card_knowns, card_clues = process_card(card)
         if card_person != move.person:
-            raise AssertionError
+            raise AssertionError(card_person, move.person)
         if card_knowns != [move]:
-            raise AssertionError
+            raise AssertionError(card_knowns, move)
         mover.add_clues(card_clues)
 
 
