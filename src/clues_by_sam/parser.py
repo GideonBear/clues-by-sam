@@ -133,8 +133,8 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
             ),
         )
 
-    def only_region_region(self, c: tuple[Verdict, tuple[Region, Region]]) -> Clue:
-        verdict, (region_a, region_b) = c
+    def only_region_region(self, c: tuple[Verdict, Region, Region]) -> Clue:
+        verdict, region_a, region_b = c
         return Combined(
             RegionClue(region_a, Count(verdict, Exact(1))),
             RegionClue(
@@ -142,6 +142,10 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
                 Count(verdict, Exact(1)),
             ),
         )
+
+    def only_region_region_2(self, c: tuple[Verdict, tuple[Region, Region]]) -> Clue:
+        verdict, (region_a, region_b) = c
+        return self.only_region_region((verdict, region_a, region_b))
 
     def parity(self, c: tuple[Parity, Verdict, Region]) -> Clue:
         parity, verdict, region = c
