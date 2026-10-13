@@ -11,11 +11,10 @@ license = "GPL-3.0-only"
 authors = [
     { name = "GideonBear", email = "dig-sultry-sedate@duck.com" },
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.15"
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: 3.15",
     "Programming Language :: Python :: Implementation :: CPython",
     "Typing :: Typed",
