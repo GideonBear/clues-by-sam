@@ -87,8 +87,11 @@ def play_game(
         #  clicking the button accidentally (as a double-click on an unflipped card for
         #  example). Clicking twice is possible to bypass waiting but still needs a
         #  short delay.
-        sleep(0.15)
-        button.click()
+        # Check if it is visible to make sure it still works on archive and bonus
+        #  puzzles
+        if button.is_visible():
+            sleep(0.15)
+            button.click()
 
         card_person, _card_profession, card_knowns, card_clues = process_card(card)
         if card_person != move.person:
