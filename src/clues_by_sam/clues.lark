@@ -65,6 +65,7 @@ clue: person "is" _a? VERDICT                                                   
     | amount "of the" int_discard? PROFESSION "s"? ("has" | "have") _a VERDICT personal_singular_region                         -> profession_amount_personal_singular_region
     | amount "of the" int_discard? PROFESSION "s"? ("has" | "have") amount VERDICT personal_region_s                            -> profession_amount_personal_singular_region_amount
     | amount VERDICT "s"? region ("has" | "have") _a VERDICT personal_singular_region                                           -> amount_personal_singular_region_conditional
+    | amount VERDICT "s"? profession_region ("has" | "have") _a VERDICT personal_singular_region                                -> amount_personal_singular_region_conditional
     | person "and" person "have" amount VERDICT "neighbor" "s"? "in common"                                                     -> common_neighbors
     | person ("has" | "have") "more" VERDICT "neighbors than" person                                                            -> more_neighbors
     | _there_is constraint "among" ("all professions" | "each profession")                                                      -> among_all_professions
