@@ -135,10 +135,13 @@ ROW_COL_TYPE: "row" | "column"
 
 constraint: amount VERDICT "s"? -> count
 
-amount: ("only" | "exactly")? NUMBER    -> exact
-       | NUMBER "or more"               -> at_least
-       | "at least" NUMBER              -> at_least
-       | "more than" NUMBER             -> more_than
+amount: ("only" | "exactly")? NUMBER        -> exact
+       | NUMBER "or more"                   -> at_least
+       | NUMBER "or less"                   -> at_most
+       | "at least" NUMBER                  -> at_least
+       | "at most" NUMBER                   -> at_most
+       | "more than" NUMBER                 -> more_than
+       | ("less" | "fewer") "than" NUMBER   -> less_than
 
 x_people: amount ("person" | "persons" | "people")
         | "no one" -> zero

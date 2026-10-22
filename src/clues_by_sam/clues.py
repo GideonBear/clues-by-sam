@@ -338,6 +338,17 @@ class AtLeast(Amount):
 
 
 @dataclass(frozen=True)
+class AtMost(Amount):
+    amount: int
+
+    def cmp(self, actual: IntNumRef) -> BoolRef:
+        return actual <= self.amount
+
+    def pb(self, args: Iterable[tuple[BoolRef, int]]) -> BoolRef:
+        return PbGe(args, self.amount)
+
+
+@dataclass(frozen=True)
 class Parity(Amount):
     parity: int
 

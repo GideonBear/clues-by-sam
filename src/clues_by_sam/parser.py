@@ -14,6 +14,7 @@ from clues_by_sam.clues import (
     All,
     Amount,
     AtLeast,
+    AtMost,
     Below,
     Between,
     Clue,
@@ -700,9 +701,17 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
         (amount,) = c
         return AtLeast(amount)
 
+    def at_most(self, c: tuple[int]) -> Amount:
+        (amount,) = c
+        return AtMost(amount)
+
     def more_than(self, c: tuple[int]) -> Amount:
         (amount,) = c
         return AtLeast(amount + 1)
+
+    def less_than(self, c: tuple[int]) -> Amount:
+        (amount,) = c
+        return AtMost(amount - 1)
 
     # x_people
 
