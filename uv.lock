@@ -93,21 +93,21 @@ wheels = [
 
 [[package]]
 name = "playwright"
-version = "1.64.0"
+version = "1.64.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "greenlet" },
     { name = "pyee" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cc/b7/24e5c283694e7a63aa376ddde395031decd7d627c77b34a58953176e8a19/playwright-1.64.0-py3-none-macosx_10_13_x86_64.whl", hash = "sha256:d76a501c9930b5a097b00e2448cda2200122a1e8e4be762ff535c1b076277737", size = 44347913, upload-time = "2026-10-13T23:35:20.723Z" },
-    { url = "https://files.pythonhosted.org/packages/b4/b3/99f6c07a7f59adb3830e42cda2e2093dc1c2cbd1f69fe4393ead30c88257/playwright-1.64.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:8de42430e9a7c8b04ec963856d484d36ffd452882318ebad2df3e6fb49a8197a", size = 43014183, upload-time = "2026-10-13T23:35:24.195Z" },
-    { url = "https://files.pythonhosted.org/packages/ed/f4/e0ddecd32342cac462777ef9123de833486743709bd437458c49e004d750/playwright-1.64.0-py3-none-macosx_11_0_universal2.whl", hash = "sha256:61e4e0801bfd76b30e04635aaec45647df707881ccf14382471fcb0eaeb1d16f", size = 44347915, upload-time = "2026-10-13T23:35:27.476Z" },
-    { url = "https://files.pythonhosted.org/packages/65/8b/78c19b805d52323122385b9c3f000144608deac38635455978af6d14807b/playwright-1.64.0-py3-none-manylinux1_x86_64.whl", hash = "sha256:5a59af1b230b234008524a5d42b613b233d4256f73bc1dd25bf3f11db0c81b75", size = 48286664, upload-time = "2026-10-13T23:35:30.981Z" },
-    { url = "https://files.pythonhosted.org/packages/7f/7e/c100ee3c59ff42e3199880d77e8f59f3230fdb0dd1ecfd21a0a203bb5a68/playwright-1.64.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:727d20be6a0884e946b2471774dd960ec95519ba533e61329038526d9aea9a23", size = 47972215, upload-time = "2026-10-13T23:35:34.976Z" },
-    { url = "https://files.pythonhosted.org/packages/c7/6e/3746bca44a77ad29fb4bf1722ad3345d5e936d5363d8daffbf23b226d3a4/playwright-1.64.0-py3-none-win32.whl", hash = "sha256:8b9f18dc1c23143ac0a5b3c59015db30e9413cc52e1ddddfc2836a7fbad7165a", size = 38675586, upload-time = "2026-10-13T23:35:38.665Z" },
-    { url = "https://files.pythonhosted.org/packages/e9/be/1dd8a65e3713c50c64b2580f50494ece90a4a9ede6e23788ef120e54c1f2/playwright-1.64.0-py3-none-win_amd64.whl", hash = "sha256:2c14d105548876b15bea5e7eca77bf0d8ff4ba0c607c1ae931067f3d1b010369", size = 38675591, upload-time = "2026-10-13T23:35:42.078Z" },
-    { url = "https://files.pythonhosted.org/packages/f1/53/683ee3eb28902208d1d0c1d2eb3d6ddd99bc0184063babc6a2a7886c5799/playwright-1.64.0-py3-none-win_arm64.whl", hash = "sha256:97a5c247f1130f3343f097caf3bb1e79358d6b6cfa3550d97ecd721d1905911a", size = 34593061, upload-time = "2026-10-13T23:35:45.768Z" },
+    { url = "https://files.pythonhosted.org/packages/8d/c8/cc677856d89a0c077673b40ab915ed5597bf1347b205cabe70121c431ca9/playwright-1.64.1-py3-none-macosx_10_13_x86_64.whl", hash = "sha256:29453ff76e25c17d0b45658cacd6b92e9eec46e8db21e134fb3b7143df50f013", size = 44508971, upload-time = "2026-10-22T16:29:58.12Z" },
+    { url = "https://files.pythonhosted.org/packages/72/4f/572bbbe60a5787ca61a84bad934c3ce19c08c2bc9c0e9781bf0d99cad1a6/playwright-1.64.1-py3-none-macosx_11_0_arm64.whl", hash = "sha256:59f7b041284ce8d1b72098ae50ca48a2d83692eec25154ab5ba79d4b6b4fe8a9", size = 43155232, upload-time = "2026-10-22T16:30:02.415Z" },
+    { url = "https://files.pythonhosted.org/packages/44/fa/468f313a56d33a6420705147c8d47bef558f087856edf38c5b13eef8aa6c/playwright-1.64.1-py3-none-macosx_11_0_universal2.whl", hash = "sha256:6a6f99adad1ae40e6ee62efe89785db861ce7ddd57651521cb31894183cc4ae3", size = 44508977, upload-time = "2026-10-22T16:30:07.632Z" },
+    { url = "https://files.pythonhosted.org/packages/15/b9/e481a34572933b5cf179d5637c98da488c732ee339dff5b73a0624d2e42b/playwright-1.64.1-py3-none-manylinux1_x86_64.whl", hash = "sha256:577b8d88778c245cfbd145ae17cf53044f084b1b46c55c69081d4069d56057e2", size = 48471931, upload-time = "2026-10-22T16:30:12.831Z" },
+    { url = "https://files.pythonhosted.org/packages/0c/11/545f25e47ec54e1e8a2892ef9994fc2b298f909ab37b88578e3a1f87ac2e/playwright-1.64.1-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a29fda44725e11b0b625c4bff6458a1f6dbee97b88c9788d12e18a8344458c2d", size = 48150994, upload-time = "2026-10-22T16:30:18.297Z" },
+    { url = "https://files.pythonhosted.org/packages/33/87/8ff7af99387ee72ae9b46a66ece7a0c0aa63f73320ecf6dd3dd087fa840a/playwright-1.64.1-py3-none-win32.whl", hash = "sha256:d3c48b31da426c2f3562d0919cb9ea4e5415f6dbd29d7211fa4d66cca24fbd2f", size = 38801828, upload-time = "2026-10-22T16:30:23.154Z" },
+    { url = "https://files.pythonhosted.org/packages/96/0a/64db6851aa1852a4f76be28eea71d4e2bf9f3ce493ee2e66939426729046/playwright-1.64.1-py3-none-win_amd64.whl", hash = "sha256:5e240a79464434c9260957b9ef59a5808e02e96e3fcabdc717fd7485260b9730", size = 38801836, upload-time = "2026-10-22T16:30:28.092Z" },
+    { url = "https://files.pythonhosted.org/packages/c5/4b/d7ddde9467a5fcfe6a0d3c954732332e98a4f4a9025fd42c8d091c16e5f9/playwright-1.64.1-py3-none-win_arm64.whl", hash = "sha256:983ccd085453ea5a7588193657fc349a6ffbf7bf7ba663fd58dc81e4aa3af9d9", size = 34693875, upload-time = "2026-10-22T16:30:32.724Z" },
 ]
 
 [[package]]
@@ -167,17 +167,17 @@ wheels = [
 
 [[package]]
 name = "z3-solver"
-version = "5.3.1.0"
+version = "5.3.2.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/95/e1/153dadafb44e67feaffde028d7ec337e7aabadaad40eff450cf29ca9b4b9/z3_solver-5.3.1.0.tar.gz", hash = "sha256:efa420092193e1e65f90fedb0905e230deb1673634e0c66cccf4aab14d533473", size = 5870439, upload-time = "2026-10-15T21:27:26.828Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b1/43/9bef2be91245a7a947c76c115e49462256503b048210e4cecf72ccc101e3/z3_solver-5.3.2.0.tar.gz", hash = "sha256:91b0028697082c3e48e7fb36dd13d642aee33a74a610c8c90b6d83f82e9f7fcc", size = 6034287, upload-time = "2026-10-25T13:36:09.062Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c8/cd/4be9cece79a8021a84bd2ce544c24331d86269876fc44054c48816ce8b7c/z3_solver-5.3.1.0-py3-none-macosx_13_0_arm64.whl", hash = "sha256:e3c1e50f79771028b3d6e9b6dc5751fda6a66c0efacec3364daf0c77d44c6405", size = 43822845, upload-time = "2026-10-15T21:26:58.183Z" },
-    { url = "https://files.pythonhosted.org/packages/6c/21/66d085d43c7dcddb11cc079aab7971fb3755d0f7a5510627a1606fb771a3/z3_solver-5.3.1.0-py3-none-macosx_13_0_x86_64.whl", hash = "sha256:a87367bde86781443086a65d0dbaa8cfbd1d7b3947ff738cde493f40d308d549", size = 47246661, upload-time = "2026-10-15T21:27:02.202Z" },
-    { url = "https://files.pythonhosted.org/packages/e9/ed/c327d486ef65228c367ef0f5c306abb3c805538c75db99600f68714ebb46/z3_solver-5.3.1.0-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:3e2e00bc80e776849d917daa194f33759ffa61d6528a859cfc4923ee3277a386", size = 36561071, upload-time = "2026-10-15T21:27:05.797Z" },
-    { url = "https://files.pythonhosted.org/packages/ca/dd/801aa58027558e8b9de4a2589c42ae6e4108e4db54ac8e373b77a8abe1db/z3_solver-5.3.1.0-py3-none-manylinux_2_38_aarch64.whl", hash = "sha256:bc94072c6117954a4ecbc809967df062e373cb203eaa901d05247b2c058fd4f7", size = 31104906, upload-time = "2026-10-15T21:27:10.083Z" },
-    { url = "https://files.pythonhosted.org/packages/bd/16/ce3ecd0384af50917c9dd2eef9ff76f9ffd3738f05e34fe0823b9a3c3a10/z3_solver-5.3.1.0-py3-none-manylinux_2_38_riscv64.whl", hash = "sha256:054f9213548ccfc96026b9d806b680d473b6ec0d78ebeb82a47b5befdeaaa2cc", size = 31883626, upload-time = "2026-10-15T21:27:14.017Z" },
-    { url = "https://files.pythonhosted.org/packages/7b/05/574cc7c432cbd8dd2f29fce6dbe0dffc3dc34d48ec73723de44dc3905489/z3_solver-5.3.1.0-py3-none-pyemscripten_2026_0_wasm32.whl", hash = "sha256:62143abf1f1f94e9b1c173db60b2f6b747f4b0780da81f4b05342bdef006bf90", size = 6525334, upload-time = "2026-10-15T21:48:09.687Z" },
-    { url = "https://files.pythonhosted.org/packages/26/8a/9441aaf33f2b226e97ef0b1397cc913d8b97e3a6009c21c960db52db9407/z3_solver-5.3.1.0-py3-none-win32.whl", hash = "sha256:46fbd5db984c306b0132e44e022b2bfa6833374363b7731ad825d55e17a6547f", size = 14632331, upload-time = "2026-10-15T21:27:17.366Z" },
-    { url = "https://files.pythonhosted.org/packages/b2/f0/e8bb32e61c8c4dfd91110f6862d29f92916f5a0b8ce68e6fd12f8b94aead/z3_solver-5.3.1.0-py3-none-win_amd64.whl", hash = "sha256:10829bb3b44510fd3f49ada06bf24ffee2f0064228927f22a6e6821216bd8e67", size = 23924644, upload-time = "2026-10-15T21:27:20.907Z" },
-    { url = "https://files.pythonhosted.org/packages/8a/f3/b6dbf32930c6b67677c99de15be7812a5f147b35e84e2ea05d27b1e06a52/z3_solver-5.3.1.0-py3-none-win_arm64.whl", hash = "sha256:7261c7c9d78a14a8325c6ee9c5f98b1e19442b97538d0ca7234ab26781e708bd", size = 16966417, upload-time = "2026-10-15T21:27:24.146Z" },
+    { url = "https://files.pythonhosted.org/packages/45/79/2d4ea296978e9a7b8f29e1a40c9b89024caf036c9172895ad7d1edb62f53/z3_solver-5.3.2.0-py3-none-macosx_13_0_arm64.whl", hash = "sha256:ac0c1457a8e7a487470386af5f60d6fef7c10db40004647fcfa7dc6e6ccec190", size = 44892461, upload-time = "2026-10-25T13:35:47.227Z" },
+    { url = "https://files.pythonhosted.org/packages/00/cc/4229a6a60f3d01bbdfa7991e23d2a4c2b96114b37204d96d398bd5dc6752/z3_solver-5.3.2.0-py3-none-macosx_13_0_x86_64.whl", hash = "sha256:27f1b0e6333b8b1d57653ef7db34fc9901ed2983b0cb9fb1efd27840e5ea880a", size = 48400142, upload-time = "2026-10-25T13:35:50.664Z" },
+    { url = "https://files.pythonhosted.org/packages/8f/ce/b909aa859a5bbb27d85866ed3eb90b945d4d9963a01a9fd2758ca5ecba69/z3_solver-5.3.2.0-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:f17df07300228a383470d4b4e1ad9daf429dc94885996712a1844a8242803935", size = 37738288, upload-time = "2026-10-25T13:35:53.535Z" },
+    { url = "https://files.pythonhosted.org/packages/bd/98/7b27f03baccb5fded7dbf20cc364332f83e196f9b096c7e5d58a2eb8cb2d/z3_solver-5.3.2.0-py3-none-manylinux_2_38_aarch64.whl", hash = "sha256:b8add6becdc222090b78d4bd5300b6a212d5ecfb0e3eadb1df008b43ddef8602", size = 32076152, upload-time = "2026-10-25T13:35:56.426Z" },
+    { url = "https://files.pythonhosted.org/packages/7e/14/d5cdb8b555db4d0f3c638453b48a609cbb4528955d13c817e00f7dc7c66e/z3_solver-5.3.2.0-py3-none-manylinux_2_38_riscv64.whl", hash = "sha256:229e18c98007771c0e0aed2b2855930b76a422bafe429aa9df71df3ad77aad63", size = 32855979, upload-time = "2026-10-25T13:35:59.209Z" },
+    { url = "https://files.pythonhosted.org/packages/0e/13/2742180bc463a117731df24522dcb27523c9208194510911abf221cb46b7/z3_solver-5.3.2.0-py3-none-pyemscripten_2026_0_wasm32.whl", hash = "sha256:c83527603a859e90a95ad0c7cc86c7eda25ee24ba33be48ad230aa9e96c107ba", size = 6683469, upload-time = "2026-10-25T14:37:17.785Z" },
+    { url = "https://files.pythonhosted.org/packages/34/16/82d4de56de40f014190e14feecc76fe9b7a09e366dc633af032380d31740/z3_solver-5.3.2.0-py3-none-win32.whl", hash = "sha256:2f5fa012652019fbd9d5df83bfe6b1aa564da886bc8922c30fa9c6161d64f525", size = 15057585, upload-time = "2026-10-25T13:36:01.792Z" },
+    { url = "https://files.pythonhosted.org/packages/c9/60/64fe7d358bb3171145274e23c2ada4c7fe1735021f92c35d427eb02cfdcb/z3_solver-5.3.2.0-py3-none-win_amd64.whl", hash = "sha256:ea23baa055caf4a470ee6335140dfd617f4082750161a1fdbf23d24259f385e3", size = 16870592, upload-time = "2026-10-25T13:36:04.183Z" },
+    { url = "https://files.pythonhosted.org/packages/ad/f9/46faff27ede9ad17e25f822a42674adcfa6677c054110d768995d6fe0baa/z3_solver-5.3.2.0-py3-none-win_arm64.whl", hash = "sha256:6042abd94269b109537bbe25ff6359b6f753dd3ff173d33c54be84b26d1ec9d8", size = 17453202, upload-time = "2026-10-25T13:36:06.617Z" },
 ]
