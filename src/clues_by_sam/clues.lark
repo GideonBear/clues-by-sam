@@ -198,6 +198,7 @@ PROFESSION: "coder"
           | "scientist"
           | "pig"
           | "worm"
+          | "vampire"
 
 NUMBER: INT
       | "no"
