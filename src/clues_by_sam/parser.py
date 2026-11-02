@@ -73,6 +73,7 @@ parser = Lark(grammar.read_text(), g_regex_flags=re.IGNORECASE)
 
 NUMBERS = {
     "no": 0,
+    "none": 0,
     "neither": 0,
     "none of the": 0,
     "both": 2,
