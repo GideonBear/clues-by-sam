@@ -130,7 +130,7 @@ personal_singular_region: "directly above" ("them" | "us")?             -> perso
                         | "directly to" ("the" | "their") "right"       -> personal_directly_right
 
 row_col: "row" ROW         -> row
-       | "column" COLUMN   -> col
+       | "column"? COLUMN  -> col
        | "my" ROW_COL_TYPE -> my_row_col
 
 ROW_COL_TYPE: "row" | "column"
