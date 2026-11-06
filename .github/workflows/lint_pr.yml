@@ -5,7 +5,7 @@ name: Lint PR
 #  and we just want it done as fast as possible.
 
 on:
-  pull_request_target: # zizmor: ignore[dangerous-triggers] this is the only way, and we're not running user code
+  pull_request:
     types:
       - opened
       - edited
