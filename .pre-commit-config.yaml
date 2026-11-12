@@ -5,6 +5,9 @@ ci:
   skip:
     - pytest
 
+default_language_versions:
+  python: 3.15
+
 repos:
   # Multi
 
