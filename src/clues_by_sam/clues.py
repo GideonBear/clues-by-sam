@@ -70,10 +70,7 @@ class Union(Region):
         object.__setattr__(self, "regions", frozenset(regions))
 
     def people(self, field: Field) -> Iterable[Person]:
-        a: set[Person] = reduce(
-            set.union, (set(region.people(field)) for region in self.regions)
-        )
-        return a
+        return {*region.people(field) for region in self.regions}
 
 
 @dataclass(frozen=True)
