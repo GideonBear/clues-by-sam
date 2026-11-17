@@ -7,7 +7,7 @@ from functools import reduce
 from typing import TYPE_CHECKING, Self, override
 
 import z3  # type: ignore[import-not-found]
-from z3 import And, BoolRef, If, IntNumRef, PbEq, PbGe, Sum
+from z3 import And, BoolRef, If, IntNumRef, Or, PbEq, PbGe, Sum
 
 from clues_by_sam.game import Field, Person, Profession
 
@@ -354,6 +354,20 @@ class Parity(Amount):
 
     def pb(self, args: Iterable[tuple[BoolRef, int]]) -> BoolRef:
         raise NotImplementedError
+
+
+@dataclass(frozen=True)
+class OrAmount(Amount):
+    amounts: frozenset[Amount]
+
+    def __init__(self, *amounts: Amount) -> None:
+        object.__setattr__(self, "amounts", frozenset(amounts))
+
+    def cmp(self, actual: IntNumRef) -> BoolRef:
+        return Or([amount.cmp(actual) for amount in self.amounts])
+
+    def pb(self, args: Iterable[tuple[BoolRef, int]]) -> BoolRef:
+        return Or([amount.pb(args) for amount in self.amounts])
 
 
 def count(

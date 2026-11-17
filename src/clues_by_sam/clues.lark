@@ -145,6 +145,7 @@ amount: ("only" | "exactly")? NUMBER        -> exact
        | "at most" NUMBER                   -> at_most
        | "more than" NUMBER                 -> more_than
        | ("less" | "fewer") "than" NUMBER   -> less_than
+       | amount "or" amount                 -> amount_or_amount
 
 x_people: amount ("person" | "persons" | "people")
         | "no one" -> zero

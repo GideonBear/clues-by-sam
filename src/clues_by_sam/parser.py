@@ -44,6 +44,7 @@ from clues_by_sam.clues import (
     Not,
     OnlyX,
     OnlyXPeople,
+    OrAmount,
     Overlap,
     Parity,
     PersonalRegion,
@@ -713,6 +714,10 @@ class ToClue(Transformer):  # type: ignore[type-arg]  # ruff: ignore[too-many-pu
     def less_than(self, c: tuple[int]) -> Amount:
         (amount,) = c
         return AtMost(amount - 1)
+
+    def amount_or_amount(self, c: tuple[Amount, Amount]) -> Amount:
+        a, b = c
+        return OrAmount(a, b)
 
     # x_people
 
